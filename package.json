@@ -1,0 +1,68 @@
+{
+  "name": "songwriting-assistant",
+  "displayName": "Songwriting Assistant",
+  "description": "AI-powered songwriting assistant for VSCode with quality critique and Suno format export",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:songwriting.generateSong",
+    "onView:songwritingPanel"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "songwriting.generateSong",
+        "title": "Songwriter: Generate New Song"
+      },
+      {
+        "command": "songwriting.critiqueSong",
+        "title": "Songwriter: Critique Current Song"
+      },
+      {
+        "command": "songwriting.reviseSong",
+        "title": "Songwriter: Revise Selection"
+      },
+      {
+        "command": "songwriting.exportSuno",
+        "title": "Songwriter: Export to Suno Format"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "songwriting-sidebar",
+          "title": "Songwriting Assistant",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "check": "tsc --noEmit",
+    "lint": "eslint src --ext ts",
+    "test": "jest",
+    "test:contracts": "jest tests/contracts",
+    "test:watch": "jest --watch"
+  },
+  "devDependencies": {
+    "@types/node": "^20.x",
+    "@types/vscode": "^1.85.0",
+    "@types/jest": "^29.5.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.50.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {}
+}
