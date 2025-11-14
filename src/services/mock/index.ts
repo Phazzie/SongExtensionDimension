@@ -5,10 +5,10 @@
  */
 
 export { MockInputValidationService } from './MockInputValidationService'
+export { MockRhymeAnalysisService } from './MockRhymeAnalysisService'
+export { MockSyllableCountingService } from './MockSyllableCountingService'
 
 // Future mock services will be exported here as they are implemented:
-// export { MockRhymeAnalysisService } from './MockRhymeAnalysisService'
-// export { MockSyllableCountingService } from './MockSyllableCountingService'
 // export { MockSongGenerationService } from './MockSongGenerationService'
 // export { MockCritiqueEngineService } from './MockCritiqueEngineService'
 // export { MockRevisionEngineService } from './MockRevisionEngineService'

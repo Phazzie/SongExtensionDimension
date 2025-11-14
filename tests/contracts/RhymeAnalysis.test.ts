@@ -29,14 +29,9 @@ describe('IRhymeAnalysisService Contract Tests', () => {
   let service: IRhymeAnalysisService
 
   beforeEach(() => {
-    // TODO: Uncomment when MockRhymeAnalysisService is implemented
-    // service = new MockRhymeAnalysisService()
-
-    // For now, this will fail - that's expected in TDD
-    // We write the tests first, then implement the service
-
-    // Type assertion to allow tests to compile before implementation
-    service = undefined as any
+    // Import the mock service
+    const { MockRhymeAnalysisService } = require('../../src/services/mock/MockRhymeAnalysisService')
+    service = new MockRhymeAnalysisService()
   })
 
   // ===========================================

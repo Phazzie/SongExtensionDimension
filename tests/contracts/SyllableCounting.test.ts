@@ -30,14 +30,9 @@ describe('ISyllableCountingService Contract Tests', () => {
   let service: ISyllableCountingService
 
   beforeEach(() => {
-    // TODO: Uncomment when MockSyllableCountingService is implemented
-    // service = new MockSyllableCountingService()
-
-    // For now, this will fail - that's expected in TDD
-    // We write the tests first, then implement the service
-
-    // Temporary: Prevent "used before assigned" errors during test writing phase
-    service = {} as ISyllableCountingService
+    // Import the mock service
+    const { MockSyllableCountingService } = require('../../src/services/mock/MockSyllableCountingService')
+    service = new MockSyllableCountingService()
   })
 
   // ===========================================
