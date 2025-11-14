@@ -11,10 +11,10 @@ import { describe, it, expect, beforeEach } from '@jest/globals'
 import type {
   IInputValidationService,
   RawPromptInput,
-  ValidationResult,
-  InputValidationErrorCode
+  ValidationResult
 } from '../../src/contracts/InputValidation'
 import { isSuccess, isFailure } from '../../src/contracts/types/common'
+import { MockInputValidationService } from '../../src/services/mock/MockInputValidationService'
 
 /**
  * NOTE: This test suite is designed to work with ANY implementation of IInputValidationService.
@@ -26,11 +26,7 @@ describe('IInputValidationService Contract Tests', () => {
   let service: IInputValidationService
 
   beforeEach(() => {
-    // TODO: Uncomment when MockInputValidationService is implemented
-    // service = new MockInputValidationService()
-
-    // For now, this will fail - that's expected in TDD
-    // We write the tests first, then implement the service
+    service = new MockInputValidationService()
   })
 
   describe('validate() method', () => {
