@@ -98,41 +98,86 @@ Any changes from this point require creating v2 contracts.
 
 **Goal**: Create validated mock services that match contracts exactly.
 
-### Implementation Plan:
+### ⚡ TEST-DRIVEN DEVELOPMENT (TDD) APPROACH
 
-#### Wave 1: Foundation Mocks (Priority: P0/P1)
-- [ ] MockInputValidationService
-- [ ] MockRhymeAnalysisService
-- [ ] MockSyllableCountingService
+**Critical Methodology Change**:
+We now follow **strict TDD** where tests are written BEFORE implementation.
+This ensures mocks cannot violate contracts and prevents the readonly property errors encountered earlier.
 
-#### Wave 2: Core Generation Mocks (Priority: P0)
-- [ ] MockSongGenerationService
-- [ ] MockCritiqueEngineService
+**TDD Cycle for Each Service:**
+1. ✍️ **Write contract tests FIRST** (defines expected behavior)
+2. 🔴 **Run tests** (they will fail - expected)
+3. 💚 **Implement mock** to make tests pass
+4. ✅ **Verify** with `npm run check` and `npm test`
+5. ♻️ **Refactor** if needed (tests remain green)
+
+### Implementation Plan (TDD Order):
+
+#### Wave 1: Foundation Services (Priority: P0/P1)
+- [x] InputValidation.test.ts (written FIRST)
+- [ ] MockInputValidationService (implement to pass tests)
+- [ ] RhymeAnalysis.test.ts (write FIRST)
+- [ ] MockRhymeAnalysisService (implement to pass tests)
+- [ ] SyllableCounting.test.ts (write FIRST)
+- [ ] MockSyllableCountingService (implement to pass tests)
+
+#### Wave 2: Core Generation (Priority: P0)
+- [ ] SongGeneration.test.ts (write FIRST)
+- [ ] MockSongGenerationService (implement to pass tests)
+- [ ] CritiqueEngine.test.ts (write FIRST)
+- [ ] MockCritiqueEngineService (implement to pass tests)
 
 #### Wave 3: Improvement Loop (Priority: P0)
-- [ ] MockRevisionEngineService
+- [ ] RevisionEngine.test.ts (write FIRST)
+- [ ] MockRevisionEngineService (implement to pass tests)
 
 #### Wave 4: Output & Persistence (Priority: P1)
-- [ ] MockSunoFormatterService
-- [ ] MockExportService
-- [ ] MockHistoryService
+- [ ] SunoFormatter.test.ts (write FIRST)
+- [ ] MockSunoFormatterService (implement to pass tests)
+- [ ] Export.test.ts (write FIRST)
+- [ ] MockExportService (implement to pass tests)
+- [ ] History.test.ts (write FIRST)
+- [ ] MockHistoryService (implement to pass tests)
 
 #### Wave 5: Advanced Features (Priority: P2)
-- [ ] MockGeminiAudioService
+- [ ] GeminiAudio.test.ts (write FIRST)
+- [ ] MockGeminiAudioService (implement to pass tests)
 
-### Validation Checklist (Per Mock):
+### TDD Validation Checklist (Per Service):
+
+**Phase A: Write Tests**
+- [ ] Contract test file created
+- [ ] All success cases covered
+- [ ] All error cases covered
+- [ ] Contract compliance tests written
+- [ ] Tests run (expected to fail)
+
+**Phase B: Implement Mock**
+- [ ] Mock class created
 - [ ] Implements interface exactly
 - [ ] Returns realistic mock data
 - [ ] All contract fields present
-- [ ] `npm run check` passes (0 errors)
+- [ ] Handles readonly properties correctly
 - [ ] No 'any' types used
-- [ ] Contract tests written
-- [ ] Contract tests pass
+
+**Phase C: Validation**
+- [ ] `npm run check` passes (0 errors)
+- [ ] `npm test -- [ServiceName].test.ts` passes (all green)
+- [ ] Code reviewed for quality
+- [ ] Documentation updated
 
 ### Current Status:
-**Mocks Completed**: 0/10
-**Tests Written**: 0/10
-**Validation Passes**: Pending
+**Tests Written**: 1/10 ✅ (InputValidation.test.ts)
+**Mocks Implemented**: 0/10
+**Tests Passing**: 0/10 (expected - TDD red phase)
+**TypeScript Errors**: 0 ✅
+
+### Why TDD?
+1. **Prevents contract violations** - Tests define exactly what mock must do
+2. **Catches readonly errors early** - Tests fail if immutability broken
+3. **Ensures completeness** - Can't forget required fields
+4. **Documents behavior** - Tests serve as living documentation
+5. **Confidence in refactoring** - Tests protect against regressions
 
 ---
 
@@ -193,12 +238,14 @@ Any changes from this point require creating v2 contracts.
 5. **Comprehensive documentation** with examples
 6. **Gold standard quality criteria** defined
 
-### Next Immediate Actions:
-1. Create MockInputValidationService
-2. Create MockRhymeAnalysisService
-3. Create MockSyllableCountingService
-4. Write contract tests for Wave 1 mocks
-5. Validate with `npm run check` and `npm test`
+### Next Immediate Actions (TDD Order):
+1. ✅ InputValidation.test.ts written (complete)
+2. Implement MockInputValidationService to pass tests
+3. Write RhymeAnalysis.test.ts
+4. Implement MockRhymeAnalysisService to pass tests
+5. Write SyllableCounting.test.ts
+6. Implement MockSyllableCountingService to pass tests
+7. Validate Wave 1 complete: `npm run check` && `npm test`
 
 ---
 
@@ -216,8 +263,9 @@ Any changes from this point require creating v2 contracts.
 - [x] No 'any' types
 - [x] Contracts are immutable
 
-### BUILD Phase 🔄
-- [ ] All mocks created
+### BUILD Phase 🔄 (TDD Approach)
+- [x] Tests written BEFORE mocks (1/10)
+- [ ] All mocks created (0/10)
 - [ ] Mocks match contracts exactly
 - [ ] All contract tests pass
 - [ ] Zero TypeScript errors maintained
@@ -253,10 +301,12 @@ Any changes from this point require creating v2 contracts.
 ## 🚨 Critical Reminders
 
 1. **Contracts are immutable** - No modifications allowed
-2. **Mocks must match contracts exactly** - Every field required
-3. **Validate after every mock** - `npm run check` must pass
-4. **No 'any' types ever** - Use type guards instead
-5. **Test everything** - Contract tests are mandatory
+2. **ALWAYS write tests FIRST** - TDD is mandatory, not optional
+3. **Mocks must match contracts exactly** - Every field required
+4. **Validate after every mock** - `npm run check` must pass
+5. **No 'any' types ever** - Use type guards instead
+6. **Handle readonly correctly** - Build values before creating readonly objects
+7. **Red-Green-Refactor** - Tests fail first, then make them pass
 
 ---
 
