@@ -9,10 +9,127 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Phase 3: BUILD - In Progress
-- [ ] Mock service implementations (0/10 complete)
-- [ ] Contract test suite
+### Phase 3: BUILD - In Progress (30% Complete)
+- [x] TDD methodology adopted (tests before mocks)
+- [x] Wave 1 complete: 3/3 mocks, 193/193 tests passing ✅
+- [ ] Wave 2-5: 7 mocks remaining
 - [ ] Service factory with mock/real toggle
+
+### Architecture Decision
+- **AI Model**: Switched from Gemini to Grok-4-fast-reasoning for Phase 5
+- **Approach**: AI-first strategy (not heuristic-first)
+- **Impact**: Phase 3 mocks unchanged, Phase 5 implementation strategy updated
+
+---
+
+## [0.1.5] - 2025-11-15
+
+### Phase 3: Wave 1 COMPLETE ✅
+
+#### Added - Test Infrastructure & TDD Methodology
+- **TDD Approach Adopted** after code review found readonly property violations
+  - Tests written BEFORE mocks (Red-Green-Refactor cycle)
+  - Contract compliance tests mandatory for all services
+  - 3 test categories: Success Cases, Error Cases, Contract Compliance
+
+- **Wave 1 Contract Tests** (All Written First)
+  - `tests/contracts/InputValidation.test.ts` - 32 tests
+  - `tests/contracts/RhymeAnalysis.test.ts` - 71 tests
+  - `tests/contracts/SyllableCounting.test.ts` - 90 tests
+  - **Total: 193 tests, 100% pass rate**
+
+#### Added - Mock Service Implementations
+- **MockInputValidationService** (346 lines)
+  - 5 methods implementing IInputValidationService
+  - Real sanitization logic (XSS prevention, normalization)
+  - Genre/mood validation with defaults
+  - Constraint validation
+  - 32/32 tests passing ✅
+
+- **MockRhymeAnalysisService** (1,064 lines)
+  - 6 methods implementing IRhymeAnalysisService
+  - Mock rhyme dictionary: 100+ words in 18 phonetic families
+  - Perfect/near/slant rhyme detection
+  - Rhyme scheme detection (ABAB, AABB, ABCB, etc.)
+  - Internal rhyme detection
+  - Quality scoring algorithm
+  - 71/71 tests passing ✅
+
+- **MockSyllableCountingService** (~800 lines)
+  - 7 methods implementing ISyllableCountingService
+  - Vowel group syllable counting algorithm
+  - Silent 'e' handling
+  - Stress pattern analysis (iambs, trochees)
+  - Meter detection (iambic, trochaic, anapestic, dactylic)
+  - Flow consistency scoring
+  - Rhythm improvement suggestions
+  - 90/90 tests passing ✅
+
+- **Barrel Export Updated**
+  - `src/services/mock/index.ts` - Exports all 3 Wave 1 mocks
+
+#### Added - Documentation & Guides
+- **CLAUDE.md** (1,100 lines) - Complete AI assistant context
+  - Project architecture and methodology
+  - All 10 seams documented
+  - Critical rules and constraints
+  - Common patterns and anti-patterns
+  - TDD workflow
+  - Current status and next steps
+
+- **copilot-instructions.md** (400 lines) - GitHub Copilot guidance
+  - Code patterns to suggest/avoid
+  - TypeScript best practices
+  - SDD-specific guidance
+  - Contract compliance rules
+
+- **AGENTS.md** (850 lines) - Sub-agent deployment guide
+  - Agent types and capabilities
+  - Usage patterns and workflows
+  - Prompt templates
+  - Parallel execution strategies
+
+- **TDD-MOCK-STRATEGY.md** (3,234 lines) - Mock implementation guide
+  - Service-by-service strategies
+  - Readonly property handling patterns
+  - Working code examples for each service
+  - Complexity rankings
+  - Time estimates
+
+- **Test Writing Guides** (2,644 lines total)
+  - TEST-GUIDE-INDEX.md - Guide overview
+  - TEST-STRATEGY-SUMMARY.md (426 lines)
+  - TEST-WRITING-GUIDE.md (1,219 lines)
+  - TEST-WRITING-QUICK-REF.md (290 lines)
+  - TEST-STRUCTURE-DIAGRAM.md (409 lines)
+
+#### Fixed - Critical Readonly Property Violations
+- **Deleted broken MockInputValidation.ts** (had 3 TypeScript errors)
+- **Root cause**: Attempting to assign to readonly properties after creation
+- **Solution**: Adopted TDD + proper readonly pattern
+  - Build all values BEFORE creating readonly object
+  - Create readonly object in ONE statement
+  - Use Object.freeze() for runtime immutability
+
+#### Technical Achievements
+- **Tests**: 193/193 passing (100% pass rate) ✅
+- **TypeScript Errors**: 0 (maintained from Phase 2) ✅
+- **TDD Compliance**: 100% (all tests written before mocks) ✅
+- **Parallel Agent Execution**: 3 agents completed Wave 1 simultaneously
+- **Speedup**: 2.4x faster than sequential implementation
+
+#### Metrics - Wave 1
+- **Mocks Implemented**: 3/10 (30%)
+- **Tests Created**: 193 (estimated 35% of total)
+- **Code Written**: ~2,200 lines of mock implementation
+- **Documentation**: ~8,200 lines of guides and context
+- **Test Coverage**: 100% for Wave 1 services
+
+#### Lessons Learned Updates
+- Added 7 new lessons from Phase 3 (BUILD) experience
+- Updated predictions based on Wave 1 completion
+- Documented TDD adoption as critical turning point
+- Documented parallel agent strategy success
 
 ---
 

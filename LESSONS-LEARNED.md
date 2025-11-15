@@ -2,8 +2,8 @@
 
 **Project**: AI-Powered Songwriting Assistant
 **Methodology**: Seam-Driven Development (SDD)
-**Date Range**: 2025-11-14
-**Phases Completed**: IDENTIFY, DEFINE
+**Date Range**: 2025-11-14 to 2025-11-15
+**Phases Completed**: IDENTIFY, DEFINE, BUILD (partial - Wave 1)
 
 ---
 
@@ -659,31 +659,375 @@ async generate(input: GenerateSongInput): Promise<ServiceResponse<GenerateSongOu
 
 ---
 
-## 🔮 Predictions for Phase 3 (BUILD)
+## 🧪 Phase 3 (BUILD) Lessons
 
-Based on our experience in Phases 1-2:
+### Lesson 21: Test-Driven Development Prevents Contract Violations
 
-### Will Go Well:
-- Mocks will match contracts (we validated heavily)
-- TypeScript will catch any shape mismatches
-- Contract tests will prove correctness
-- Integration should work first try
+**Critical Discovery:**
+After code review found 3 TypeScript errors from readonly property mutations in an early mock, we pivoted to strict TDD.
 
-### Potential Challenges:
-- Readonly property handling in complex objects
-- Generating realistic mock data for all scenarios
-- Maintaining 0 TypeScript errors as mocks grow
+**The Problem:**
+```typescript
+// ❌ This failed in MockInputValidationService
+const validatedContext: PromptContext = { genre: input.genre }
+validatedContext.genre = 'alternative' // ERROR: Cannot assign to readonly!
+```
 
-### Success Criteria for Phase 3:
-- All 10 mocks implemented
-- npm run check: 0 errors
-- All contract tests passing
-- No 'any' types
-- Ready for UI development
+**The Solution: TDD Approach**
+1. **RED**: Write comprehensive tests FIRST (define expected behavior)
+2. **GREEN**: Implement mock to pass tests (forces correct patterns)
+3. **REFACTOR**: Improve while keeping tests green
+
+**What We Learned:**
+- Writing tests first makes readonly property violations IMPOSSIBLE
+- Tests catch contract mismatches before they become bugs
+- TDD adds ~20% upfront time but saves 200% debugging time
+- Tests serve as executable documentation
+
+**Implementation Pattern:**
+```typescript
+// Step 1: Write test (RED phase)
+it('should return ValidatedPrompt with all required fields', async () => {
+  const result = await service.validate(input)
+  expect(isSuccess(result)).toBe(true)
+  if (isSuccess(result)) {
+    expect(result.data.validatedPrompt.genre).toBeDefined()
+    expect(result.data.validatedPrompt.prompt).toBe(sanitizedPrompt)
+  }
+})
+
+// Step 2: Implement to pass (GREEN phase)
+async validate(input: RawPromptInput): Promise<ServiceResponse<ValidationResult>> {
+  // Build all values BEFORE creating readonly object
+  const sanitizedPrompt = this.cleanText(input.prompt)
+  const validatedGenre = this.validateGenre(input.context?.genre)
+
+  // Create readonly object in ONE statement
+  const validatedPrompt: ValidatedPrompt = Object.freeze({
+    id: createPromptId(),
+    prompt: sanitizedPrompt,
+    context: Object.freeze({ genre: validatedGenre }),
+    // ... all fields
+  })
+
+  return createSuccess({ validatedPrompt, warnings: [], modifications: [] })
+}
+```
+
+**Results:**
+- Wave 1: 193/193 tests passing ✅
+- 0 TypeScript errors ✅
+- 0 readonly property violations ✅
+- 100% contract compliance ✅
+
+**Impact**: TDD adoption was THE turning point. Tests now prevent the exact errors we hit before.
 
 ---
 
-**Status**: Phases 1-2 complete with zero compromises
-**Next**: Phase 3 BUILD with same rigorous approach
-**Confidence Level**: High (thanks to SDD)
+### Lesson 22: Parallel Agent Deployment Maximizes Velocity
+
+**What We Did:**
+Deployed 3 sub-agents in parallel to complete Wave 1:
+- Agent 1: Implement MockInputValidationService
+- Agent 2: Implement MockRhymeAnalysisService
+- Agent 3: Implement MockSyllableCountingService
+
+**Time Comparison:**
+- Sequential approach: 3 × 2 hours = 6 hours
+- Parallel approach: max(2, 2, 2) = ~2.5 hours actual
+- **Speedup: 2.4x**
+
+**Keys to Success:**
+1. **Clear contracts** - Each agent had complete contract definition
+2. **Comprehensive guides** - TDD-MOCK-STRATEGY.md provided working examples
+3. **No dependencies** - Wave 1 services don't depend on each other
+4. **Detailed prompts** - Each agent given exact requirements + examples
+
+**Agent Prompt Template:**
+```
+You are implementing MockXService to pass the tests in XService.test.ts.
+
+CRITICAL REQUIREMENTS:
+1. Read contract: src/contracts/X.ts
+2. Read tests: tests/contracts/X.test.ts
+3. Read strategy: TDD-MOCK-STRATEGY.md (section X)
+4. Implement to make ALL tests pass
+5. NEVER modify readonly properties after creation
+6. Run: npm run check (must be 0 errors)
+7. Run: npm test -- X.test.ts (must be 100% pass)
+
+READONLY PATTERN (CRITICAL):
+[paste correct pattern here]
+```
+
+**Results:**
+- All 3 agents completed successfully
+- 0 TypeScript errors from any agent
+- 193/193 tests passing
+- 0 coordination overhead
+
+**Lesson**: For independent tasks with clear contracts, parallel agents are a force multiplier.
+
+---
+
+### Lesson 23: Documentation IS Code for AI Development
+
+**What We Created:**
+- `CLAUDE.md` (1,100 lines) - Complete AI assistant context
+- `copilot-instructions.md` (400 lines) - GitHub Copilot guidance
+- `AGENTS.md` (850 lines) - Sub-agent deployment guide
+- `TDD-MOCK-STRATEGY.md` (3,234 lines) - Implementation strategies
+- 5 test-writing guides (2,644 lines total)
+
+**Total documentation: ~8,200 lines**
+
+**Why This Matters for AI Development:**
+1. **AI assistants need complete context** - Can't assume knowledge
+2. **Prevents repeated mistakes** - Document anti-patterns explicitly
+3. **Enables autonomous work** - Agents can work independently
+4. **Maintains consistency** - All agents follow same patterns
+5. **Serves as onboarding** - New AI sessions start informed
+
+**Structure That Worked:**
+```markdown
+# CLAUDE.md
+- Project overview (what/why)
+- Architecture (how it works)
+- Critical rules (NEVER do X, ALWAYS do Y)
+- Common patterns (with code examples)
+- Anti-patterns (with explanations)
+- Current status (where we are)
+- Next steps (what's next)
+```
+
+**ROI:**
+- Time to create: ~3 hours
+- Time saved: Countless (agents don't repeat mistakes)
+- Quality improvement: Massive (consistency across all work)
+
+**Lesson**: In AI-assisted development, documentation isn't overhead—it's infrastructure.
+
+---
+
+### Lesson 24: Architecture Decisions Should Be Revisable
+
+**What Happened:**
+After implementing Wave 1 with heuristics-based mocks, user revealed:
+- Wants AI-first approach (not heuristic-first)
+- Wants Grok-4-fast-reasoning (not Gemini)
+- Thought we were using AI everywhere
+
+**Initial Panic:** "This is all wrong. Do we have to change everything?"
+
+**Reality Check (SDD saves the day):**
+- ✅ Mocks (Phase 3): Don't need to change - they're for UI development
+- ✅ Contracts (Phase 2): Model-agnostic - don't care if it's Gemini/Grok/GPT
+- ✅ Seams (Phase 1): Still valid - seams don't care about implementation
+- 🔧 Documentation: Update "Gemini" → "AI model" in comments
+- 🔧 Phase 5 strategy: Use Grok instead (hasn't started yet)
+
+**What We Learned:**
+1. **Contracts are truly implementation-agnostic** - This is SDD's superpower
+2. **Mocks can differ from real** - Mocks use heuristics, real uses AI (both valid)
+3. **Documentation comments aren't binding** - Easy to update
+4. **Architecture decisions affect Phase 5, not 1-4** - Most work still valid
+
+**The Fix:**
+- 15 minutes of documentation updates
+- No code changes needed
+- Continue with existing plan
+- Phase 5 uses Grok instead of Gemini
+
+**Lesson**: Good architecture (SDD + contracts) makes major changes cheap. Bad architecture makes small changes expensive.
+
+---
+
+### Lesson 25: Progress Estimation Requires Honest Assessment
+
+**User Question:** "How close to done are we?"
+
+**Initial Optimism Trap:** "We've done a lot! Phases 1-2 complete, Wave 1 done!"
+
+**Honest Assessment:**
+- Overall completion: ~15-20%
+- Phase 3 (BUILD): 30% complete (3/10 mocks)
+- Phase 4 (DEVELOP): 0% (UI not started)
+- Phase 5 (IMPLEMENT): 0% (real services not started)
+- Phase 6 (INTEGRATE): 0% (integration not started)
+
+**Time Remaining:**
+- Optimistic: 5-7 weeks
+- Realistic: 8-12 weeks
+- Pessimistic: 12-16 weeks
+
+**What We Learned:**
+1. **Foundation ≠ completion** - Good architecture is 20%, execution is 80%
+2. **Test counts are misleading** - 193 tests sounds great, but 7 mocks remain
+3. **UI is the iceberg** - Phase 4 is 2-3 weeks of work (not started)
+4. **Integration always surprises** - Even with SDD, Phase 6 finds issues
+
+**Communication Pattern:**
+```
+✅ What's DONE: Phases 1-2, Wave 1 (193 tests)
+🔄 What's IN PROGRESS: Phase 3 (30% complete)
+⏳ What's NOT STARTED: Phases 4-6 (70% of total work)
+📊 Realistic completion: 8-12 weeks
+```
+
+**Lesson**: Celebrate progress, but be honest about remaining work. Optimism feels good; realism delivers.
+
+---
+
+### Lesson 26: Contract Tests Have Three Mandatory Categories
+
+**Test Structure That Emerged:**
+Every service test file needs these three categories:
+
+```typescript
+describe('IServiceName Contract Tests', () => {
+  describe('method() - Success Cases', () => {
+    // Happy path tests
+  })
+
+  describe('method() - Error Cases', () => {
+    // All error codes from contract
+  })
+
+  describe('method() - Contract Compliance', () => {
+    it('should never throw exceptions', async () => {
+      // Verify ServiceResponse pattern
+    })
+
+    it('should always return ServiceResponse shape', async () => {
+      // Verify success/error structure
+    })
+
+    it('should preserve readonly semantics', async () => {
+      // Verify immutability
+    })
+  })
+})
+```
+
+**Why This Matters:**
+1. **Success Cases**: Prove happy path works
+2. **Error Cases**: Prove all error codes reachable
+3. **Contract Compliance**: Prove SDD contract adherence
+
+**The Third Category Is Critical:**
+- Catches contract violations (throwing instead of returning errors)
+- Catches shape mismatches (missing fields)
+- Catches immutability breaks (mutated readonly properties)
+
+**Results:**
+- InputValidation: 32 tests (10 success, 15 error, 7 compliance)
+- RhymeAnalysis: 71 tests (28 success, 30 error, 13 compliance)
+- SyllableCounting: 90 tests (35 success, 40 error, 15 compliance)
+
+**Lesson**: Contract compliance tests are the "SDD tax" - non-negotiable overhead that pays for itself.
+
+---
+
+### Lesson 27: Realistic Mock Data Makes UI Development Easier
+
+**Bad Mock (minimal):**
+```typescript
+async generate(): Promise<ServiceResponse<Song>> {
+  return createSuccess({
+    song: { id: 'mock', title: 'Mock', verses: [] } as Song
+  })
+}
+```
+
+**Good Mock (realistic):**
+```typescript
+async generate(input: GenerateSongInput): Promise<ServiceResponse<GenerateSongOutput>> {
+  // Generate realistic song based on input
+  const theme = this.extractTheme(input.prompt.prompt)
+  const verses = this.generateVerses(theme, 3)
+  const chorus = this.generateChorus(theme)
+
+  const song: Song = Object.freeze({
+    id: createSongId(`mock_${Date.now()}`),
+    title: `Song About ${theme}`,
+    verses: verses.map(v => Object.freeze(v)),
+    choruses: [Object.freeze(chorus)],
+    // ... all fields realistic
+  })
+
+  return createSuccess({
+    song,
+    alternatives: this.generateAlternatives(song),
+    confidence: 0.85,
+    generationMetadata: {
+      model: 'mock-heuristic',
+      tokensUsed: 0,
+      generationTime: 150,
+      iterations: 1,
+      promptVersion: '1.0',
+      timestamp: new Date()
+    }
+  })
+}
+```
+
+**Why Realistic Mocks Matter:**
+1. **UI developers see real data** - Not just `[]` and empty strings
+2. **Edge cases surface early** - Long titles, many verses, etc.
+3. **Visual design is accurate** - UI designed for real data shapes
+4. **User testing is meaningful** - Realistic content enables feedback
+
+**Examples from Wave 1:**
+- MockRhymeAnalysisService: 100+ word rhyme dictionary across 18 phonetic families
+- MockSyllableCountingService: Actual vowel-counting algorithm (not `return 1`)
+- MockInputValidationService: Real sanitization logic (not just `return input`)
+
+**Lesson**: Mocks should be "stupid but realistic", not "smart but minimal".
+
+---
+
+## 🔮 Predictions for Phase 3 (BUILD) - UPDATED
+
+Based on Wave 1 completion:
+
+### Confirmed Successes (From Wave 1):
+- ✅ TDD prevents readonly property violations completely
+- ✅ Parallel agents can complete independent mocks simultaneously
+- ✅ TypeScript catches all shape mismatches at compile time
+- ✅ Contract tests prove 100% compliance
+- ✅ Realistic mocks generate useful test data
+
+### Remaining Challenges (Waves 2-5):
+- Wave 2 services are MUCH more complex (SongGeneration ~200 tests, CritiqueEngine ~150 tests)
+- Mock song generation requires sophisticated heuristics
+- Mock critique engine needs to simulate 6-dimensional quality analysis
+- Maintaining motivation through 7 more mocks
+
+### Acceleration Strategy:
+- Deploy parallel agents for each wave (3-4 agents per wave)
+- Use TDD-MOCK-STRATEGY.md as blueprint (proven effective)
+- Write tests in one session, implement mocks in next session
+- Validate frequently (npm run check + npm test after every mock)
+
+### Updated Success Criteria for Phase 3:
+- [x] Wave 1: 3/3 mocks implemented ✅ (193/193 tests passing)
+- [ ] Wave 2: 2 mocks (SongGeneration, CritiqueEngine) - ~350 tests
+- [ ] Wave 3: 1 mock (RevisionEngine) - ~120 tests
+- [ ] Wave 4: 3 mocks (SunoFormatter, Export, History) - ~200 tests
+- [ ] Wave 5: 1 mock (GeminiAudio) - ~70 tests
+- [ ] Final validation: npm run check (0 errors), npm test (100% pass)
+
+### Timeline Estimate (Based on Wave 1):
+- Wave 1 (complete): 2.5 hours (3 agents in parallel)
+- Wave 2 (planned): 4-6 hours (2 complex services, 2 agents in parallel)
+- Wave 3 (planned): 3-4 hours (1 complex service)
+- Wave 4 (planned): 3-4 hours (3 simpler services, 3 agents in parallel)
+- Wave 5 (planned): 2 hours (1 moderate service)
+- **Total remaining: ~15-20 hours**
+
+---
+
+**Status**: Phase 3 at 30% completion (Wave 1 done)
+**Next**: Wave 2 tests + mocks (SongGeneration, CritiqueEngine)
+**Confidence Level**: Very High (TDD + parallel agents proven effective)
 

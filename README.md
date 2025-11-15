@@ -45,10 +45,14 @@ An AI-powered VSCode extension that serves as a professional songwriting assista
 - **Documentation**: ✅ Complete JSDoc for all contracts
 - **Contracts Status**: 🔒 IMMUTABLE (no changes allowed)
 
-### 🔄 Phase 3: BUILD - IN PROGRESS
-- Mock services being implemented
-- Contract tests pending
-- Target: 100% contract compliance
+### 🔄 Phase 3: BUILD - IN PROGRESS (TDD Approach)
+- **Test-Driven Development**: Tests written BEFORE mocks
+- **Contract Tests**: 3/10 written ✅ (193 tests created)
+- **Mock Services**: 3/10 implemented ✅ (Wave 1 COMPLETE)
+- **Methodology**: Red-Green-Refactor cycle
+- **Wave 1 Status**: ✅ COMPLETE (InputValidation, RhymeAnalysis, SyllableCounting)
+- **Tests Passing**: 193/193 ✅ (100% pass rate)
+- **Target**: 100% contract compliance through testing
 
 ---
 
@@ -112,24 +116,29 @@ npm run test:contracts # Run contract tests only
 
 ### Critical Rules
 1. **Never modify contracts** after Phase 2 (create v2 instead)
-2. **Always run `npm run check`** after changes (must show 0 errors)
-3. **No 'any' types** anywhere in codebase
-4. **Contract tests are mandatory** for all mocks
+2. **ALWAYS write tests FIRST** (TDD is mandatory, not optional)
+3. **Always run `npm run check`** after changes (must show 0 errors)
+4. **No 'any' types** anywhere in codebase
+5. **Handle readonly correctly** - build values before creating readonly objects
+6. **Red-Green-Refactor** - embrace the TDD cycle
 
 ---
 
-## 📖 SDD Methodology
+## 📖 SDD Methodology + TDD
 
-This project strictly follows Seam-Driven Development:
+This project strictly follows Seam-Driven Development with Test-Driven Development:
 
 1. **IDENTIFY**: Map all data boundaries → `DATA-BOUNDARIES.md`
 2. **DEFINE**: Create immutable contracts → `/contracts/`
-3. **BUILD**: Create validated mocks → `/services/mock/`
+3. **BUILD** (TDD Approach):
+   - Write contract tests FIRST → `/tests/contracts/`
+   - Implement mocks to pass tests → `/services/mock/`
+   - Red-Green-Refactor cycle
 4. **DEVELOP**: Build UI against mocks → `/ui/`
 5. **IMPLEMENT**: Create real services → `/services/real/`
 6. **INTEGRATE**: Switch mocks → real (should work first try)
 
-**Current Phase**: BUILD (Step 3)
+**Current Phase**: BUILD (Step 3) - Writing tests before mocks
 
 ---
 
@@ -154,8 +163,10 @@ This project strictly follows Seam-Driven Development:
 ## 📊 Metrics
 
 - **Contracts Defined**: 10/10 ✅
-- **Mocks Implemented**: 0/10 🔄
-- **Contract Tests**: 0/10 ⏳
+- **Contract Tests Written**: 3/10 🔄 (193 tests total)
+- **Mocks Implemented**: 3/10 🔄 (Wave 1 complete)
+- **Tests Passing**: 193/193 ✅ (100% pass rate)
+- **Wave 1**: ✅ COMPLETE (InputValidation, RhymeAnalysis, SyllableCounting)
 - **UI Components**: 0 ⏳
 - **Real Services**: 0 ⏳
 
@@ -163,17 +174,23 @@ This project strictly follows Seam-Driven Development:
 - **'any' Types Used**: 0 ✅
 - **Type Safety**: 100% ✅
 - **Documentation Coverage**: 100% ✅
+- **TDD Compliance**: 100% ✅
 
 ---
 
 ## 🔄 Next Steps
 
-### Immediate (Phase 3: BUILD)
-1. Complete mock service implementations
-2. Fix readonly property assignments in mocks
-3. Write contract tests for all mocks
-4. Validate: `npm run check` → 0 errors
-5. Validate: `npm test:contracts` → all pass
+### Immediate (Phase 3: BUILD - TDD Approach)
+1. ✅ Wave 1 COMPLETE: Foundation services (InputValidation, RhymeAnalysis, SyllableCounting)
+   - 193/193 tests passing ✅
+   - 3/3 mocks implemented ✅
+   - 0 TypeScript errors ✅
+2. ⏭️ NEXT: Wave 2 - Core Generation
+   - Write SongGeneration.test.ts (tests FIRST)
+   - Write CritiqueEngine.test.ts (tests FIRST)
+   - Implement MockSongGenerationService
+   - Implement MockCritiqueEngineService
+3. Continue with Waves 3-5 (remaining 6 services)
 
 ### Short Term (Phase 4: DEVELOP)
 1. Build VSCode extension structure
