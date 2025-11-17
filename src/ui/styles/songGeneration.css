@@ -1,0 +1,575 @@
+/**
+ * Song Generation Panel Styles
+ * VSCode Theme Integration
+ */
+
+/* VSCode CSS Variables */
+:root {
+  --container-padding: 20px;
+  --input-height: 30px;
+  --border-radius: 4px;
+}
+
+/* Reset */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-foreground);
+  background-color: var(--vscode-editor-background);
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--container-padding);
+}
+
+/* Header */
+header {
+  text-align: center;
+  padding: 20px 0 40px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+  margin-bottom: 30px;
+}
+
+header h1 {
+  margin: 0 0 10px;
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--vscode-editor-foreground);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--vscode-descriptionForeground);
+  font-size: 14px;
+}
+
+/* Sections */
+section {
+  margin-bottom: 40px;
+}
+
+section h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 20px;
+  color: var(--vscode-editor-foreground);
+}
+
+section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 20px 0 10px;
+  color: var(--vscode-editor-foreground);
+}
+
+/* Form Styles */
+.form-section {
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: var(--border-radius);
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: var(--vscode-input-foreground);
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  height: var(--input-height);
+  padding: 4px 8px;
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border: 1px solid var(--vscode-input-border);
+  border-radius: var(--border-radius);
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+}
+
+.form-group textarea {
+  height: auto;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+
+.help-text {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+}
+
+/* Form Row */
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* Advanced Options */
+.advanced-options {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--vscode-sideBar-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: var(--border-radius);
+}
+
+.advanced-options summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--vscode-textLink-foreground);
+  margin-bottom: 16px;
+  user-select: none;
+}
+
+.advanced-options summary:hover {
+  color: var(--vscode-textLink-activeForeground);
+}
+
+.advanced-options[open] summary {
+  margin-bottom: 20px;
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--border-radius);
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--vscode-button-hoverBackground);
+}
+
+.btn-secondary {
+  background: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button[type="submit"] {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  font-size: 16px;
+}
+
+/* Loading State */
+.loading-section {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.loader {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--vscode-panel-border);
+  border-top: 4px solid var(--vscode-progressBar-background);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#loadingMessage {
+  color: var(--vscode-descriptionForeground);
+  font-size: 14px;
+}
+
+/* Error Display */
+.error-section {
+  margin: 20px 0;
+}
+
+.error-box {
+  background: var(--vscode-inputValidation-errorBackground);
+  border: 1px solid var(--vscode-inputValidation-errorBorder);
+  border-radius: var(--border-radius);
+  padding: 16px;
+}
+
+.error-box h3 {
+  margin: 0 0 10px;
+  color: var(--vscode-errorForeground);
+}
+
+.error-box p {
+  margin: 8px 0;
+  color: var(--vscode-foreground);
+}
+
+.error-box .suggestion {
+  font-style: italic;
+  color: var(--vscode-descriptionForeground);
+}
+
+/* Song Display */
+.song-section {
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: var(--border-radius);
+  padding: 20px;
+}
+
+.song-header {
+  text-align: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+  margin-bottom: 20px;
+}
+
+.song-header h2 {
+  margin: 0 0 10px;
+  font-size: 24px;
+  color: var(--vscode-editor-foreground);
+}
+
+.song-meta {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.song-meta span {
+  padding: 4px 12px;
+  background: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+  border-radius: 12px;
+}
+
+.song-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.song-section {
+  margin-bottom: 30px;
+}
+
+.song-section h3 {
+  color: var(--vscode-textLink-foreground);
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.song-line {
+  margin: 8px 0;
+  line-height: 1.8;
+  color: var(--vscode-editor-foreground);
+  font-size: 15px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--vscode-panel-border);
+  flex-wrap: wrap;
+}
+
+.action-buttons .btn {
+  flex: 1;
+  min-width: 150px;
+  justify-content: center;
+}
+
+/* Critique Display */
+.critique-section {
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: var(--border-radius);
+  padding: 20px;
+}
+
+.score-overview {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 30px;
+  margin-bottom: 30px;
+  padding-bottom: 30px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.overall-score {
+  text-align: center;
+}
+
+.score-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 700;
+  border: 6px solid;
+  margin-bottom: 10px;
+}
+
+.score-circle.gold {
+  border-color: #FFD700;
+  color: #FFD700;
+  background: rgba(255, 215, 0, 0.1);
+}
+
+.score-circle.excellent {
+  border-color: #4CAF50;
+  color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.score-circle.good {
+  border-color: #2196F3;
+  color: #2196F3;
+  background: rgba(33, 150, 243, 0.1);
+}
+
+.score-circle.needs-work {
+  border-color: #FF9800;
+  color: #FF9800;
+  background: rgba(255, 152, 0, 0.1);
+}
+
+#qualityLevel {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.score-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.score-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.score-item label {
+  min-width: 180px;
+  font-size: 13px;
+  color: var(--vscode-foreground);
+}
+
+.score-bar {
+  flex: 1;
+  height: 20px;
+  background: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.score-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 10px;
+}
+
+.score-fill.gold {
+  background: linear-gradient(90deg, #FFD700, #FFA500);
+}
+
+.score-fill.excellent {
+  background: linear-gradient(90deg, #4CAF50, #8BC34A);
+}
+
+.score-fill.good {
+  background: linear-gradient(90deg, #2196F3, #03A9F4);
+}
+
+.score-fill.needs-work {
+  background: linear-gradient(90deg, #FF9800, #FFC107);
+}
+
+.critique-details {
+  display: grid;
+  gap: 24px;
+}
+
+.strengths,
+.issues,
+.suggestions {
+  padding: 16px;
+  background: var(--vscode-sideBar-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: var(--border-radius);
+}
+
+.strengths h3 {
+  color: #4CAF50;
+  margin-top: 0;
+}
+
+.issues h3 {
+  color: #FF9800;
+  margin-top: 0;
+}
+
+.suggestions h3 {
+  color: #2196F3;
+  margin-top: 0;
+}
+
+.strengths ul,
+.suggestions ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.strengths li,
+.suggestions li {
+  margin: 8px 0;
+  line-height: 1.6;
+}
+
+.issue {
+  padding: 12px;
+  margin-bottom: 10px;
+  border-left: 4px solid;
+  background: var(--vscode-input-background);
+  border-radius: 0 4px 4px 0;
+}
+
+.issue-critical {
+  border-left-color: #F44336;
+}
+
+.issue-major {
+  border-left-color: #FF9800;
+}
+
+.issue-minor {
+  border-left-color: #FFC107;
+}
+
+.issue-info {
+  border-left-color: #2196F3;
+}
+
+.issue strong {
+  color: var(--vscode-editor-foreground);
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.issue em {
+  color: var(--vscode-descriptionForeground);
+  font-size: 13px;
+}
+
+/* Checkbox Styling */
+input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .score-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-buttons .btn {
+    width: 100%;
+  }
+}
+
+/* Scrollbar Styling (for WebView) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--vscode-editor-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--vscode-scrollbarSlider-background);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--vscode-scrollbarSlider-hoverBackground);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--vscode-scrollbarSlider-activeBackground);
+}

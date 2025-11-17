@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Revision Tools - Songwriting Assistant</title>
+  <link rel="stylesheet" href="./styles/revision.css">
+</head>
+<body>
+  <div class="revision-container">
+    <!-- Strategy Selection Section -->
+    <section class="strategy-section">
+      <h2>Revision Strategy</h2>
+
+      <div class="strategy-options">
+        <label class="strategy-radio">
+          <input type="radio" name="strategy" value="conservative">
+          <span class="strategy-label">Conservative</span>
+          <span class="strategy-desc">Minimal changes, preserve original</span>
+        </label>
+        <label class="strategy-radio">
+          <input type="radio" name="strategy" value="moderate" checked>
+          <span class="strategy-label">Moderate</span>
+          <span class="strategy-desc">Balanced improvements</span>
+        </label>
+        <label class="strategy-radio">
+          <input type="radio" name="strategy" value="aggressive">
+          <span class="strategy-label">Aggressive</span>
+          <span class="strategy-desc">Major rewrites</span>
+        </label>
+        <label class="strategy-radio">
+          <input type="radio" name="strategy" value="surgical">
+          <span class="strategy-label">Surgical</span>
+          <span class="strategy-desc">Targeted fixes only</span>
+        </label>
+        <label class="strategy-radio">
+          <input type="radio" name="strategy" value="creative">
+          <span class="strategy-label">Creative</span>
+          <span class="strategy-desc">Explore new directions</span>
+        </label>
+      </div>
+
+      <!-- Voice Preservation Toggle -->
+      <div class="voice-preservation">
+        <label class="toggle-switch">
+          <input type="checkbox" id="voicePreservation" checked>
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label">Preserve Original Voice</span>
+      </div>
+    </section>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator hidden">
+      <div class="spinner"></div>
+      <p>Revising song...</p>
+    </div>
+
+    <!-- Error Display -->
+    <div id="errorDisplay" class="error-display hidden">
+      <p id="errorMessage"></p>
+    </div>
+
+    <!-- Revise Button -->
+    <div class="action-buttons">
+      <button id="reviseBtn" class="btn btn-primary">Revise Song</button>
+    </div>
+
+    <!-- Improvement Metrics Section -->
+    <section id="metricsSection" class="metrics-section hidden">
+      <h2>Improvement Metrics</h2>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Before Score</div>
+          <div id="beforeScore" class="metric-value">-</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">After Score</div>
+          <div id="afterScore" class="metric-value">-</div>
+        </div>
+        <div class="metric-card highlight">
+          <div class="metric-label">Improvement</div>
+          <div id="improvement" class="metric-value">-</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Issues Fixed</div>
+          <div id="issuesFixed" class="metric-value">-</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Issues Remaining</div>
+          <div id="issuesRemaining" class="metric-value">-</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Quality Level</div>
+          <div id="qualityLevel" class="metric-value">-</div>
+        </div>
+      </div>
+
+      <!-- Category Improvements -->
+      <div class="category-improvements">
+        <h3>Category Improvements</h3>
+        <div id="categoryMetrics" class="category-grid"></div>
+      </div>
+    </section>
+
+    <!-- Change Tracker Section -->
+    <section id="changesSection" class="changes-section hidden">
+      <h2>Changes Made</h2>
+      <div id="changesList" class="changes-list"></div>
+    </section>
+
+    <!-- Side-by-Side Comparison Section -->
+    <section id="comparisonSection" class="comparison-section hidden">
+      <h2>Before / After Comparison</h2>
+
+      <div class="comparison-container">
+        <!-- Original Song Column -->
+        <div class="comparison-column">
+          <h3>Original</h3>
+          <div id="originalSongText" class="song-text">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Revised Song Column -->
+        <div class="comparison-column">
+          <h3>Revised</h3>
+          <div id="revisedSongText" class="song-text">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Alternative Versions Section -->
+    <section id="alternativesSection" class="alternatives-section hidden">
+      <h2>Alternative Versions</h2>
+      <div id="alternativesList" class="alternatives-list">
+        <!-- Populated by JavaScript -->
+      </div>
+    </section>
+
+    <!-- Accept/Revert Action Buttons -->
+    <div id="actionButtons" class="action-buttons-final hidden">
+      <button id="acceptBtn" class="btn btn-success">Accept Revision</button>
+      <button id="revertBtn" class="btn btn-secondary">Revert to Original</button>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Initialize webview communication (for VSCode extension)
+     *
+     * Note: When running in VSCode extension context, the vscode API
+     * is available. For standalone testing, this would need a mock.
+     */
+    const vscode = window.vscode || {
+      postMessage: (msg) => console.log('Message:', msg)
+    };
+
+    /**
+     * Strategy Selection Handler
+     */
+    document.querySelectorAll('input[name="strategy"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        vscode.postMessage({
+          command: 'updateStrategy',
+          strategy: e.target.value
+        });
+      });
+    });
+
+    /**
+     * Voice Preservation Toggle Handler
+     */
+    document.getElementById('voicePreservation')?.addEventListener('change', (e) => {
+      vscode.postMessage({
+        command: 'toggleVoicePreservation',
+        preserveVoice: e.target.checked
+      });
+    });
+
+    /**
+     * Revise Button Handler
+     */
+    document.getElementById('reviseBtn')?.addEventListener('click', () => {
+      vscode.postMessage({
+        command: 'revise',
+        targetIssues: null,
+        voiceProfile: null,
+        customFeedback: null
+      });
+    });
+
+    /**
+     * Accept Button Handler
+     */
+    document.getElementById('acceptBtn')?.addEventListener('click', () => {
+      vscode.postMessage({ command: 'acceptRevision' });
+    });
+
+    /**
+     * Revert Button Handler
+     */
+    document.getElementById('revertBtn')?.addEventListener('click', () => {
+      vscode.postMessage({ command: 'revertRevision' });
+    });
+
+    /**
+     * Handle state updates from extension
+     */
+    window.addEventListener('message', event => {
+      const message = event.data;
+      if (message.command === 'updateState') {
+        updateUI(message.state);
+      }
+    });
+
+    /**
+     * Update UI with revision state
+     * @param {Object} state - Current revision panel state
+     */
+    function updateUI(state) {
+      // Update metrics
+      if (state.metrics) {
+        document.getElementById('beforeScore').textContent = state.metrics.beforeScore.toFixed(1);
+        document.getElementById('afterScore').textContent = state.metrics.afterScore.toFixed(1);
+        document.getElementById('improvement').textContent = state.metrics.improvement.toFixed(1) + '%';
+        document.getElementById('issuesFixed').textContent = state.metrics.issuesFixed;
+        document.getElementById('issuesRemaining').textContent = state.metrics.issuesRemaining;
+        document.getElementById('qualityLevel').textContent = state.metrics.qualityLevelChange;
+
+        // Update category improvements
+        const categoryMetrics = document.getElementById('categoryMetrics');
+        if (categoryMetrics) {
+          categoryMetrics.innerHTML = Object.entries(state.metrics.categoryImprovements)
+            .map(([key, value]) => `
+              <div class="category-metric">
+                <div class="category-name">${key.replace(/_/g, ' ')}</div>
+                <div class="category-change">${value.before.toFixed(1)} → ${value.after.toFixed(1)}</div>
+              </div>
+            `).join('');
+        }
+
+        document.getElementById('metricsSection')?.classList.remove('hidden');
+      }
+
+      // Update changes list
+      if (state.changes && state.changes.length > 0) {
+        const changesList = document.getElementById('changesList');
+        if (changesList) {
+          changesList.innerHTML = state.changes
+            .map(change => `
+              <div class="change-item">
+                <div class="change-type">${change.type.replace(/_/g, ' ')}</div>
+                <div class="change-original">${escapeHtml(change.original)}</div>
+                <div class="change-arrow">→</div>
+                <div class="change-revised">${escapeHtml(change.revised)}</div>
+                <div class="change-reason">${escapeHtml(change.reason)}</div>
+              </div>
+            `).join('');
+        }
+        document.getElementById('changesSection')?.classList.remove('hidden');
+      }
+
+      // Update comparison
+      if (state.originalSong && state.revisedSong) {
+        document.getElementById('originalSongText').innerHTML = formatSongText(state.originalSong);
+        document.getElementById('revisedSongText').innerHTML = formatSongText(state.revisedSong);
+        document.getElementById('comparisonSection')?.classList.remove('hidden');
+      }
+
+      // Update alternatives
+      if (state.alternatives && state.alternatives.length > 0) {
+        const alternativesList = document.getElementById('alternativesList');
+        if (alternativesList) {
+          alternativesList.innerHTML = state.alternatives
+            .map(alt => `
+              <div class="alternative-item">
+                <div class="alternative-direction">${alt.direction.replace(/_/g, ' ')}</div>
+                <div class="alternative-description">${escapeHtml(alt.description)}</div>
+                <div class="alternative-score">Score: ${alt.improvementScore.toFixed(1)}</div>
+                <button class="btn btn-sm btn-primary" onclick="vscode.postMessage({ command: 'viewAlternative', versionId: '${alt.versionId}' })">View</button>
+              </div>
+            `).join('');
+        }
+        document.getElementById('alternativesSection')?.classList.remove('hidden');
+      }
+
+      // Update action buttons
+      if (state.hasRevision) {
+        document.getElementById('actionButtons')?.classList.remove('hidden');
+      }
+
+      // Update loading state
+      if (state.isLoading) {
+        document.getElementById('loadingIndicator')?.classList.remove('hidden');
+      } else {
+        document.getElementById('loadingIndicator')?.classList.add('hidden');
+      }
+
+      // Update error display
+      if (state.error) {
+        document.getElementById('errorMessage').textContent = state.error;
+        document.getElementById('errorDisplay')?.classList.remove('hidden');
+      } else {
+        document.getElementById('errorDisplay')?.classList.add('hidden');
+      }
+    }
+
+    /**
+     * Format song data for display
+     * @param {Object} song - Song object
+     * @returns {string} HTML representation of song
+     */
+    function formatSongText(song) {
+      let html = `<div class="song-title">${escapeHtml(song.title)}</div>`;
+
+      // Verses
+      if (song.verses && song.verses.length > 0) {
+        song.verses.forEach(verse => {
+          html += `<div class="section-label">Verse ${verse.number}</div>`;
+          html += `<div class="section-content">`;
+          if (verse.lines) {
+            verse.lines.forEach(line => {
+              html += `<div class="song-line">${escapeHtml(line.text)}</div>`;
+            });
+          }
+          html += `</div>`;
+        });
+      }
+
+      // Choruses
+      if (song.choruses && song.choruses.length > 0) {
+        song.choruses.forEach((chorus, idx) => {
+          html += `<div class="section-label">Chorus</div>`;
+          html += `<div class="section-content">`;
+          if (chorus.lines) {
+            chorus.lines.forEach(line => {
+              html += `<div class="song-line">${escapeHtml(line.text)}</div>`;
+            });
+          }
+          html += `</div>`;
+        });
+      }
+
+      // Bridge
+      if (song.bridge && song.bridge.lines) {
+        html += `<div class="section-label">Bridge</div>`;
+        html += `<div class="section-content">`;
+        song.bridge.lines.forEach(line => {
+          html += `<div class="song-line">${escapeHtml(line.text)}</div>`;
+        });
+        html += `</div>`;
+      }
+
+      return html;
+    }
+
+    /**
+     * Escape HTML special characters
+     * @param {string} text - Text to escape
+     * @returns {string} Escaped text safe for HTML
+     */
+    function escapeHtml(text) {
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    /**
+     * Example state for testing (can be used for standalone testing)
+     */
+    const exampleState = {
+      originalSong: {
+        title: 'My Love Song',
+        verses: [
+          {
+            number: 1,
+            lines: [
+              { text: 'The sky is bright' },
+              { text: 'When you are near' },
+              { text: 'My heart feels light' },
+              { text: 'Without any fear' }
+            ]
+          }
+        ],
+        choruses: [
+          {
+            lines: [
+              { text: 'I love you so' },
+              { text: 'More than you know' },
+              { text: 'My feelings show' },
+              { text: 'And they will grow' }
+            ]
+          }
+        ],
+        bridge: null
+      },
+      revisedSong: {
+        title: 'My Love Song (Revised)',
+        verses: [
+          {
+            number: 1,
+            lines: [
+              { text: 'The sky burns brilliant' },
+              { text: 'When you are near' },
+              { text: 'My heart soars gently' },
+              { text: 'Banishing all fear' }
+            ]
+          }
+        ],
+        choruses: [
+          {
+            lines: [
+              { text: 'I love you deeply' },
+              { text: 'More than you could know' },
+              { text: 'My passion rising' },
+              { text: 'With every ebb and flow' }
+            ]
+          }
+        ],
+        bridge: null
+      },
+      metrics: {
+        beforeScore: 65,
+        afterScore: 82,
+        improvement: 26.15,
+        issuesFixed: 3,
+        issuesRemaining: 2,
+        qualityLevelChange: 'good → excellent',
+        categoryImprovements: {
+          rhyme_quality: { before: 60, after: 85, delta: 25, percentChange: 41.67 },
+          imagery_vividness: { before: 70, after: 90, delta: 20, percentChange: 28.57 },
+          flow_consistency: { before: 65, after: 80, delta: 15, percentChange: 23.08 }
+        }
+      },
+      changes: [
+        {
+          changeId: 'change_0',
+          type: 'IMAGERY_ENHANCEMENT',
+          original: 'The sky is bright',
+          revised: 'The sky burns brilliant',
+          reason: 'Vague imagery - use more vivid language'
+        },
+        {
+          changeId: 'change_1',
+          type: 'WORD_SUBSTITUTION',
+          original: 'feels light',
+          revised: 'soars gently',
+          reason: 'Weak word - replace with stronger verb'
+        }
+      ],
+      alternatives: [
+        {
+          versionId: 'alt_0',
+          direction: 'darker',
+          description: 'More melancholic and introspective tone',
+          improvementScore: 75
+        },
+        {
+          versionId: 'alt_1',
+          direction: 'lighter',
+          description: 'More uplifting and optimistic tone',
+          improvementScore: 78
+        }
+      ],
+      isLoading: false,
+      error: null,
+      hasRevision: true
+    };
+  </script>
+</body>
+</html>

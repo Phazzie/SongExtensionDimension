@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Song History & Version Control</title>
+    <link rel="stylesheet" href="styles/history.css" />
+  </head>
+  <body>
+    <div id="history-container" class="history-container">
+      <!-- Header -->
+      <header class="history-header">
+        <h1>Version History</h1>
+        <p class="subtitle">Track, compare, and rollback your song versions</p>
+      </header>
+
+      <!-- Error Message -->
+      <div id="error-message" class="error-message" style="display: none"></div>
+
+      <!-- Loading Indicator -->
+      <div id="loading-indicator" class="loading-indicator" style="display: none">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+      </div>
+
+      <!-- Main Content -->
+      <div class="history-main">
+        <!-- Sidebar: Controls -->
+        <aside class="history-sidebar">
+          <!-- Song Selector -->
+          <div class="control-section">
+            <label for="song-selector" class="label">Current Song</label>
+            <select id="song-selector" class="select-input">
+              <option value="">Select a song...</option>
+            </select>
+          </div>
+
+          <!-- Search -->
+          <div class="control-section">
+            <label for="search-input" class="label">Search Versions</label>
+            <input
+              type="text"
+              id="search-input"
+              class="text-input"
+              placeholder="Search by description or notes..."
+            />
+          </div>
+
+          <!-- Tag Filter -->
+          <div class="control-section">
+            <label class="label">Filter by Tags</label>
+            <div id="tag-filters" class="tag-filters"></div>
+            <input type="text" id="tag-input" class="text-input" placeholder="Add tag filter..." />
+            <button id="add-tag-btn" class="btn btn-secondary">Add Tag</button>
+          </div>
+
+          <!-- Sort Options -->
+          <div class="control-section">
+            <label class="label">Sort by</label>
+            <div class="sort-options">
+              <button id="sort-date" class="btn btn-small btn-active">Date</button>
+              <button id="sort-version" class="btn btn-small">Version</button>
+            </div>
+            <div class="sort-direction">
+              <button id="sort-asc" class="btn btn-small">Ascending</button>
+              <button id="sort-desc" class="btn btn-small btn-active">Descending</button>
+            </div>
+          </div>
+
+          <!-- Storage Stats -->
+          <div class="control-section">
+            <button id="show-stats-btn" class="btn btn-primary">View Storage Stats</button>
+            <button id="export-json" class="btn btn-secondary">Export JSON</button>
+            <button id="export-markdown" class="btn btn-secondary">Export Markdown</button>
+            <button id="export-timeline" class="btn btn-secondary">Export Timeline</button>
+          </div>
+        </aside>
+
+        <!-- Main Panel -->
+        <main class="history-main-content">
+          <!-- Tabs -->
+          <div class="history-tabs">
+            <button id="tab-list" class="tab-button active" data-tab="list-view">
+              Versions List
+            </button>
+            <button id="tab-timeline" class="tab-button" data-tab="timeline-view">Timeline</button>
+            <button id="tab-comparison" class="tab-button" data-tab="comparison-view">
+              Compare
+            </button>
+            <button id="tab-stats" class="tab-button" data-tab="stats-view">Storage</button>
+          </div>
+
+          <!-- List View (Default) -->
+          <div id="list-view" class="tab-content active">
+            <div class="list-header">
+              <h2>Version History</h2>
+              <div id="filter-stats" class="filter-stats"></div>
+            </div>
+
+            <div id="versions-list" class="versions-list">
+              <!-- Version items will be rendered here -->
+            </div>
+
+            <div class="empty-state" style="display: none">
+              <p>No versions found. Create a new version to get started.</p>
+            </div>
+          </div>
+
+          <!-- Timeline View -->
+          <div id="timeline-view" class="tab-content">
+            <div class="timeline-header">
+              <h2>Version Timeline</h2>
+              <p class="subtitle">Visual timeline of all versions</p>
+            </div>
+
+            <div id="timeline-container" class="timeline-container">
+              <!-- Timeline will be rendered here -->
+            </div>
+
+            <div class="empty-state" style="display: none">
+              <p>No versions to display.</p>
+            </div>
+          </div>
+
+          <!-- Comparison View -->
+          <div id="comparison-view" class="tab-content">
+            <div class="comparison-header">
+              <h2>Version Comparison</h2>
+              <p class="subtitle">Compare two versions side-by-side</p>
+            </div>
+
+            <div class="comparison-controls">
+              <div class="version-selector">
+                <label for="compare-version-1">First Version</label>
+                <select id="compare-version-1" class="select-input"></select>
+              </div>
+              <div class="version-selector">
+                <label for="compare-version-2">Second Version</label>
+                <select id="compare-version-2" class="select-input"></select>
+              </div>
+              <button id="compare-btn" class="btn btn-primary">Compare</button>
+            </div>
+
+            <div id="comparison-container" class="comparison-container">
+              <!-- Comparison will be rendered here -->
+            </div>
+
+            <div class="empty-state" style="display: none">
+              <p>Select two versions to compare.</p>
+            </div>
+          </div>
+
+          <!-- Storage Stats View -->
+          <div id="stats-view" class="tab-content">
+            <div class="stats-header">
+              <h2>Storage Statistics</h2>
+              <p class="subtitle">Overview of your version history storage</p>
+            </div>
+
+            <div id="storage-stats" class="storage-stats">
+              <!-- Stats will be rendered here -->
+            </div>
+
+            <div class="cleanup-section">
+              <h3>Cleanup Old Versions</h3>
+              <p>Remove old versions to free up storage space.</p>
+              <div class="cleanup-controls">
+                <input type="number" id="keep-latest" class="text-input" value="5" min="1" />
+                <label for="keep-latest">Keep latest versions</label>
+              </div>
+              <button id="cleanup-btn" class="btn btn-warning">Run Cleanup (Dry Run)</button>
+              <button id="cleanup-confirm-btn" class="btn btn-danger" style="display: none">
+                Confirm Cleanup
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <!-- Modals -->
+
+      <!-- Rollback Confirmation Modal -->
+      <div id="rollback-modal" class="modal" style="display: none">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Confirm Rollback</h2>
+            <button class="modal-close" aria-label="Close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p id="rollback-message"></p>
+            <div class="backup-info">
+              <p>
+                <strong>Note:</strong> A backup of the current version will be created before
+                rollback.
+              </p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button id="rollback-confirm-btn" class="btn btn-danger">Rollback</button>
+            <button id="rollback-cancel-btn" class="btn btn-secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delete Confirmation Modal -->
+      <div id="delete-modal" class="modal" style="display: none">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Delete Version</h2>
+            <button class="modal-close" aria-label="Close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p id="delete-message"></p>
+            <div class="warning">
+              <p><strong>Warning:</strong> This action cannot be undone.</p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button id="delete-confirm-btn" class="btn btn-danger">Delete</button>
+            <button id="delete-cancel-btn" class="btn btn-secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tag Management Modal -->
+      <div id="tag-modal" class="modal" style="display: none">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Manage Version Tags</h2>
+            <button class="modal-close" aria-label="Close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <input
+              type="text"
+              id="new-tag-input"
+              class="text-input"
+              placeholder="Enter new tag..."
+            />
+            <div id="existing-tags" class="tag-list"></div>
+          </div>
+          <div class="modal-footer">
+            <button id="tag-add-btn" class="btn btn-primary">Add Tag</button>
+            <button id="tag-close-btn" class="btn btn-secondary">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes Modal -->
+      <div id="notes-modal" class="modal" style="display: none">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Edit Version Notes</h2>
+            <button class="modal-close" aria-label="Close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <textarea id="notes-textarea" class="textarea" placeholder="Add notes about this version..."></textarea>
+          </div>
+          <div class="modal-footer">
+            <button id="notes-save-btn" class="btn btn-primary">Save</button>
+            <button id="notes-cancel-btn" class="btn btn-secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container" class="notification-container"></div>
+
+    <script src="history.js"></script>
+  </body>
+</html>

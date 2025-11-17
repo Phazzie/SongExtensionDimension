@@ -18,21 +18,191 @@
     "commands": [
       {
         "command": "songwriting.generateSong",
-        "title": "Songwriter: Generate New Song"
+        "title": "Songwriter: Generate New Song",
+        "description": "Generate a complete song from a prompt using AI",
+        "category": "Songwriting"
       },
       {
         "command": "songwriting.critiqueSong",
-        "title": "Songwriter: Critique Current Song"
+        "title": "Songwriter: Critique Current Song",
+        "description": "Analyze the current song for quality and provide detailed feedback",
+        "category": "Songwriting"
       },
       {
         "command": "songwriting.reviseSong",
-        "title": "Songwriter: Revise Selection"
+        "title": "Songwriter: Revise Current Song",
+        "description": "Improve the current song based on critique feedback",
+        "category": "Songwriting"
       },
       {
-        "command": "songwriting.exportSuno",
-        "title": "Songwriter: Export to Suno Format"
+        "command": "songwriting.exportSong",
+        "title": "Songwriter: Export Song",
+        "description": "Export the current song to various file formats",
+        "category": "Songwriting"
+      },
+      {
+        "command": "songwriting.showHistory",
+        "title": "Songwriter: Show Song History",
+        "description": "View version history, compare versions, and rollback changes",
+        "category": "Songwriting"
       }
     ],
+    "keybindings": [
+      {
+        "command": "songwriting.generateSong",
+        "key": "ctrl+shift+g",
+        "mac": "cmd+shift+g",
+        "when": "editorFocus || !editorFocus"
+      },
+      {
+        "command": "songwriting.critiqueSong",
+        "key": "ctrl+shift+c",
+        "mac": "cmd+shift+c",
+        "when": "editorFocus || !editorFocus"
+      },
+      {
+        "command": "songwriting.reviseSong",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
+        "when": "editorFocus || !editorFocus"
+      },
+      {
+        "command": "songwriting.exportSong",
+        "key": "ctrl+shift+e",
+        "mac": "cmd+shift+e",
+        "when": "editorFocus || !editorFocus"
+      },
+      {
+        "command": "songwriting.showHistory",
+        "key": "ctrl+shift+h",
+        "mac": "cmd+shift+h",
+        "when": "editorFocus || !editorFocus"
+      }
+    ],
+    "configuration": {
+      "title": "Songwriting Assistant",
+      "properties": {
+        "songwriting.showWelcome": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show welcome message when extension is activated"
+        },
+        "songwriting.aiProvider": {
+          "type": "string",
+          "enum": [
+            "gemini",
+            "openai"
+          ],
+          "default": "gemini",
+          "description": "AI provider for song generation and critique"
+        },
+        "songwriting.geminiApiKey": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "API key for Google Gemini API. Get one at https://ai.google.dev",
+          "scope": "machine"
+        },
+        "songwriting.openaiApiKey": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "API key for OpenAI API. Get one at https://platform.openai.com",
+          "scope": "machine"
+        },
+        "songwriting.critiqueLevel": {
+          "type": "string",
+          "enum": [
+            "casual",
+            "professional",
+            "gold-standard"
+          ],
+          "default": "professional",
+          "description": "Default critique level for song analysis",
+          "markdownEnumDescriptions": [
+            "Lenient feedback for practice and learning",
+            "Standard professional quality expectations",
+            "Elite publication-ready standards (strictest)"
+          ]
+        },
+        "songwriting.revisionStrategy": {
+          "type": "string",
+          "enum": [
+            "conservative",
+            "moderate",
+            "aggressive",
+            "surgical",
+            "creative"
+          ],
+          "default": "moderate",
+          "description": "Default strategy for song revisions",
+          "markdownEnumDescriptions": [
+            "Minimal changes, preserve most original text",
+            "Balanced approach, fix issues while preserving voice",
+            "Major rewrites to achieve quality standards",
+            "Line-by-line targeted fixes only",
+            "Explore new creative directions"
+          ]
+        },
+        "songwriting.exportFormat": {
+          "type": "string",
+          "enum": [
+            "text",
+            "markdown",
+            "json",
+            "pdf",
+            "html",
+            "suno"
+          ],
+          "default": "text",
+          "description": "Default export format for songs"
+        },
+        "songwriting.defaultExportDirectory": {
+          "type": "string",
+          "default": "${userHome}/Music/Songwriting Assistant",
+          "markdownDescription": "Default directory for exporting songs. Supports `${userHome}` variable"
+        },
+        "songwriting.preserveVoice": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically preserve original song voice during revisions"
+        },
+        "songwriting.autoSaveVersions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically save versions after each generation and revision"
+        },
+        "songwriting.maxVersionsPerSong": {
+          "type": "integer",
+          "default": 50,
+          "minimum": 5,
+          "maximum": 1000,
+          "description": "Maximum number of versions to keep per song (older versions auto-deleted)"
+        },
+        "songwriting.generationTemperature": {
+          "type": "number",
+          "default": 0.7,
+          "minimum": 0,
+          "maximum": 1,
+          "markdownDescription": "Creativity level for generation (0 = deterministic, 1 = highly creative)"
+        },
+        "songwriting.qualityThreshold": {
+          "type": "number",
+          "default": 0.75,
+          "minimum": 0,
+          "maximum": 1,
+          "markdownDescription": "Minimum quality threshold for generated content (0-1)"
+        },
+        "songwriting.enableTelemetry": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable usage telemetry (no personal data collected)"
+        },
+        "songwriting.debugMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable debug logging (check Output > Songwriting Assistant)"
+        }
+      }
+    },
     "viewsContainers": {
       "activitybar": [
         {
@@ -41,12 +211,25 @@
           "icon": "resources/icon.svg"
         }
       ]
+    },
+    "views": {
+      "songwriting-sidebar": [
+        {
+          "id": "songwritingPanel",
+          "name": "Songwriting Panel",
+          "type": "webview",
+          "when": "extension:songwriting-assistant:ready"
+        }
+      ]
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run package",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-webpack": "webpack",
+    "watch-webpack": "webpack --watch",
     "check": "tsc --noEmit",
     "lint": "eslint src --ext ts",
     "test": "jest",
@@ -54,15 +237,20 @@
     "test:watch": "jest --watch"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.0",
     "@types/node": "^20.x",
     "@types/vscode": "^1.85.0",
-    "@types/jest": "^29.5.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.50.0",
     "jest": "^29.5.0",
     "ts-jest": "^29.1.0",
-    "typescript": "^5.3.0"
+    "ts-loader": "^9.5.0",
+    "typescript": "^5.3.0",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1"
+  }
 }
