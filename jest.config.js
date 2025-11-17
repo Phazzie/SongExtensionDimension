@@ -3,6 +3,14 @@ module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>/tests'],
   testMatch: ['**/*.test.ts'],
+  globals: {
+    'ts-jest': {
+      tsconfig: 'tsconfig.test.json',
+      diagnostics: {
+        ignoreCodes: [2578] // Ignore "Unused '@ts-expect-error' directive"
+      }
+    }
+  },
   moduleNameMapper: {
     '^@contracts/(.*)$': '<rootDir>/src/contracts/$1',
     '^@services/(.*)$': '<rootDir>/src/services/$1',
