@@ -15,9 +15,8 @@ vsc-extension-quickstart.md
 **/*.ts
 
 # Build artifacts (we include only compiled JS in /out)
+# All dependencies are bundled by webpack into /out, so we exclude all of node_modules
 node_modules/**
-!node_modules/@google/**
-!node_modules/openai/**
 
 # Documentation (only README.md is included)
 CLAUDE.md

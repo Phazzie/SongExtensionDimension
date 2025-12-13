@@ -88,14 +88,20 @@ export class CostTracker {
   private warningCallbacks: CostWarningCallback[] = []
   private lastResetMonth: number
   private warningsIssued: Set<number> = new Set() // Track which warning levels have been issued
+  private maxEntries: number
+  private maxAgeDays: number
 
   /**
    * Create a new cost tracker
    *
    * @param monthlyLimit - Monthly budget limit in USD (default: $100)
+   * @param maxEntries - Maximum number of entries to keep (default: 10000)
+   * @param maxAgeDays - Maximum age of entries in days (default: 90)
    */
-  constructor(monthlyLimit: number = 100) {
+  constructor(monthlyLimit: number = 100, maxEntries: number = 10000, maxAgeDays: number = 90) {
     this.monthlyLimit = monthlyLimit
+    this.maxEntries = maxEntries
+    this.maxAgeDays = maxAgeDays
     this.lastResetMonth = new Date().getMonth()
   }
 
@@ -117,6 +123,9 @@ export class CostTracker {
   ): void {
     // Check if we need to reset for new month
     this.checkMonthlyReset()
+
+    // Prune old entries to prevent unbounded memory growth
+    this.pruneOldEntries()
 
     // Create entry
     const entry: CostEntry = {
@@ -344,6 +353,28 @@ export class CostTracker {
   }
 
   // ==================== PRIVATE HELPER METHODS ====================
+
+  /**
+   * Prune old entries to prevent unbounded memory growth
+   *
+   * Removes entries that are:
+   * - Older than maxAgeDays (default: 90 days)
+   * - Beyond maxEntries count (default: 10000)
+   */
+  private pruneOldEntries(): void {
+    const now = new Date()
+    const cutoffDate = new Date(now.getTime() - this.maxAgeDays * 24 * 60 * 60 * 1000)
+
+    // Remove entries older than maxAgeDays
+    this.entries = this.entries.filter(entry => entry.timestamp >= cutoffDate)
+
+    // If still over maxEntries, remove oldest entries
+    if (this.entries.length > this.maxEntries) {
+      // Sort by timestamp descending and keep only maxEntries
+      this.entries.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+      this.entries = this.entries.slice(0, this.maxEntries)
+    }
+  }
 
   /**
    * Get month-to-date cost

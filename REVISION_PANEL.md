@@ -108,6 +108,9 @@ class RevisionPanel {
 
   // Public methods
   public async show(song: Song, critique: CritiqueReport): Promise<void>
+  public getRevisedSong(): Song | null
+  public getOriginalSong(): Song | null
+  public hasRevision(): boolean
   public dispose(): void
 
   // Private methods
@@ -198,12 +201,15 @@ const critique = critiqueResult.data
 const revisionPanel = new RevisionPanel(context)
 await revisionPanel.show(song, critique)
 
-// 4. After user accepts revision
-// (In production, would capture revised song from panel state)
-const revisedSong = revisionPanel.getRevisedSong()
+// 4. After user accepts revision, get the revised song
+if (revisionPanel.hasRevision()) {
+  const revisedSong = revisionPanel.getRevisedSong()
 
-// 5. Save and continue
-await saveToWorkspace(revisedSong)
+  // 5. Save and continue
+  if (revisedSong) {
+    await saveToWorkspace(revisedSong)
+  }
+}
 ```
 
 ## API Reference
@@ -231,6 +237,44 @@ Display the revision panel with a song and its critique.
 - Updates panel state with song and critique
 - Populates UI with initial data
 - Ready for user interaction
+
+#### getRevisedSong()
+```typescript
+getRevisedSong(): Song | null
+```
+Get the currently revised song.
+
+**Returns:**
+- `Song` if a revision has been made and is available
+- `null` if no revision exists
+
+**Usage:**
+```typescript
+const revisedSong = revisionPanel.getRevisedSong()
+if (revisedSong) {
+  await saveToWorkspace(revisedSong)
+}
+```
+
+#### getOriginalSong()
+```typescript
+getOriginalSong(): Song | null
+```
+Get the original song that was passed to the panel.
+
+**Returns:**
+- `Song` if an original song was set via `show()`
+- `null` if no song has been loaded
+
+#### hasRevision()
+```typescript
+hasRevision(): boolean
+```
+Check if a revision is currently available.
+
+**Returns:**
+- `true` if `getRevisedSong()` would return a non-null value
+- `false` otherwise
 
 #### dispose()
 ```typescript

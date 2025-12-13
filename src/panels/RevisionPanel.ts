@@ -687,6 +687,33 @@ export class RevisionPanel {
   }
 
   /**
+   * Get the currently revised song
+   *
+   * @returns The revised Song if available, or null if no revision has been made
+   */
+  getRevisedSong(): Song | null {
+    return this.state.revisedSong
+  }
+
+  /**
+   * Get the original song
+   *
+   * @returns The original Song if available, or null if not set
+   */
+  getOriginalSong(): Song | null {
+    return this.state.originalSong
+  }
+
+  /**
+   * Check if a revision is available
+   *
+   * @returns true if a revised song is available
+   */
+  hasRevision(): boolean {
+    return this.state.revisedSong !== null
+  }
+
+  /**
    * Dispose the panel
    */
   dispose(): void {

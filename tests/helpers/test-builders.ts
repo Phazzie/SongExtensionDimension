@@ -4,7 +4,7 @@
  */
 
 import type { ValidatedPrompt, PromptId } from '../../src/contracts/InputValidation'
-import type { Song, SongId, Verse, Chorus, VerseId, ChorusId, Line, LineId } from '../../src/contracts/types/song'
+import type { Song, SongId, Verse, Chorus, VerseId, ChorusId, Line } from '../../src/contracts/types/song'
 import type { StructureConstraints, StyleConfig } from '../../src/contracts/types/song'
 
 /**
@@ -18,8 +18,7 @@ export function createValidatedPrompt(
 
   return {
     id,
-    originalPrompt: text,
-    sanitizedPrompt: text,
+    prompt: text,
     context: {
       genre: 'pop',
       mood: 'neutral',
@@ -34,15 +33,16 @@ export function createValidatedPrompt(
       linesPerChorus: 4,
       includeBridge: false,
       rhymeScheme: 'ABAB' as const,
-      syllablesPerLine: null,
+      minSyllablesPerLine: 6,
+      maxSyllablesPerLine: 12,
       ...overrides?.constraints
     },
     style: {
       genre: 'pop',
       mood: 'neutral',
-      poeticDevices: [],
       ...overrides?.style
     },
+    sanitized: true,
     validatedAt: new Date(),
     ...overrides
   }
@@ -61,7 +61,8 @@ export function createConstraints(
     linesPerChorus: 4,
     includeBridge: false,
     rhymeScheme: 'ABAB' as const,
-    syllablesPerLine: null,
+    minSyllablesPerLine: 6,
+    maxSyllablesPerLine: 12,
     ...overrides
   }
 }
@@ -75,7 +76,6 @@ export function createStyleConfig(
   return {
     genre: 'pop',
     mood: 'neutral',
-    poeticDevices: [],
     ...overrides
   }
 }
@@ -95,7 +95,8 @@ export function createTestSong(overrides?: Partial<Song>): Song {
       createLine('Line 3 of verse one', 3),
       createLine('Line 4 of verse one', 4)
     ],
-    rhymeScheme: 'ABAB'
+    rhymeScheme: 'ABAB',
+    syllablePattern: [6, 6, 6, 6]
   }
 
   const verse2: Verse = {
@@ -107,7 +108,8 @@ export function createTestSong(overrides?: Partial<Song>): Song {
       createLine('Line 3 of verse two', 3),
       createLine('Line 4 of verse two', 4)
     ],
-    rhymeScheme: 'ABAB'
+    rhymeScheme: 'ABAB',
+    syllablePattern: [6, 6, 6, 6]
   }
 
   const chorus: Chorus = {
@@ -119,7 +121,8 @@ export function createTestSong(overrides?: Partial<Song>): Song {
       createLine('Chorus line four', 4)
     ],
     rhymeScheme: 'AABB',
-    isRepeat: false
+    syllablePattern: [5, 5, 5, 5],
+    isMainChorus: true
   }
 
   return {
@@ -127,16 +130,14 @@ export function createTestSong(overrides?: Partial<Song>): Song {
     title: 'Test Song',
     verses: [verse1, verse2],
     choruses: [chorus],
-    bridge: null,
     metadata: {
-      created: new Date(),
-      modified: new Date(),
       version: 1,
       genre: 'pop',
       mood: 'neutral',
       theme: 'test',
       tags: ['test']
     },
+    generatedAt: new Date(),
     ...overrides
   }
 }
@@ -144,14 +145,16 @@ export function createTestSong(overrides?: Partial<Song>): Song {
 /**
  * Create a test line
  */
-function createLine(text: string, number: number): Line {
+function createLine(text: string, lineNumber: number): Line {
+  const syllables = estimateSyllables(text)
+  // Generate a simple stress pattern based on syllable count (alternating x/)
+  const stressPattern = Array(syllables).fill(0).map((_, i) => i % 2 === 0 ? 'x' : '/').join('')
+
   return {
-    id: `line_${number}` as LineId,
-    number,
     text,
-    syllables: estimateSyllables(text),
-    stressPattern: null,
-    endSound: null
+    syllables,
+    stressPattern,
+    lineNumber
   }
 }
 
@@ -223,7 +226,8 @@ export const TestPrompts = {
       linesPerChorus: 4,
       includeBridge: true,
       rhymeScheme: 'AABB' as const,
-      syllablesPerLine: 8
+      minSyllablesPerLine: 8,
+      maxSyllablesPerLine: 10
     }
   }),
 
