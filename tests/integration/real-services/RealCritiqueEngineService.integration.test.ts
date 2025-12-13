@@ -16,7 +16,7 @@ import { RealCritiqueEngineService } from '../../../src/services/real/RealCritiq
 import { RealSongGenerationService } from '../../../src/services/real/RealSongGenerationService'
 import { GrokProvider } from '../../../src/services/providers/GrokProvider'
 import type { ICritiqueEngineService } from '../../../src/contracts/CritiqueEngine'
-import { QualityLevel, IssueType } from '../../../src/contracts/CritiqueEngine'
+import { QualityLevel, IssueType, CritiqueLevel } from '../../../src/contracts/CritiqueEngine'
 import { Severity } from '../../../src/contracts/types/common'
 import { isSuccess, isFailure } from '../../../src/contracts/types/common'
 import {
@@ -189,7 +189,7 @@ describe('RealCritiqueEngineService Integration Tests', () => {
       }
     }, 20000)
 
-    it('should have section analysis array', async () => {
+    it('should have section analysis array with proper structure', async () => {
       if (!hasApiKey()) return
 
       const song = createTestSong()
@@ -199,10 +199,28 @@ describe('RealCritiqueEngineService Integration Tests', () => {
         expect(Array.isArray(result.data.sectionAnalysis)).toBe(true)
 
         result.data.sectionAnalysis.forEach(section => {
+          // Verify required properties from SectionAnalysis contract
           expect(section).toHaveProperty('sectionId')
           expect(section).toHaveProperty('sectionType')
-          expect(section).toHaveProperty('score')
-          assertScoreInRange(section.score, 0, 100)
+          expect(section).toHaveProperty('scores')
+          expect(section).toHaveProperty('issues')
+          expect(section).toHaveProperty('cohesion')
+          expect(section).toHaveProperty('effectiveness')
+
+          // Verify scores object structure
+          expect(section.scores).toHaveProperty('rhymeConsistency')
+          expect(section.scores).toHaveProperty('rhythmConsistency')
+          expect(section.scores).toHaveProperty('thematicCohesion')
+          expect(section.scores).toHaveProperty('narrativeFlow')
+          expect(section.scores).toHaveProperty('overall')
+
+          // Verify score ranges
+          assertScoreInRange(section.scores.overall, 0, 100)
+          assertScoreInRange(section.cohesion, 0, 100)
+          assertScoreInRange(section.effectiveness, 0, 100)
+
+          // Verify issues array
+          expect(Array.isArray(section.issues)).toBe(true)
         })
       }
     }, 20000)
@@ -313,7 +331,7 @@ describe('RealCritiqueEngineService Integration Tests', () => {
         ]
 
         // Calculate variance
-        const avg = allScores.reduce((a, b) => a + b) / allScores.length
+        const avg = allScores.reduce((a, b) => (a as number) + (b as number), 0) / allScores.length
         const variance = allScores.reduce((sum, score) =>
           sum + Math.pow(score - avg, 2), 0) / allScores.length
 
@@ -471,8 +489,8 @@ describe('RealCritiqueEngineService Integration Tests', () => {
 
       const song = createTestSong()
 
-      const professionalResult = await service.analyzeSong(song, 'professional')
-      const casualResult = await service.analyzeSong(song, 'casual')
+      const professionalResult = await service.analyzeSong(song, CritiqueLevel.PROFESSIONAL)
+      const casualResult = await service.analyzeSong(song, CritiqueLevel.CASUAL)
 
       expect(isSuccess(professionalResult)).toBe(true)
       expect(isSuccess(casualResult)).toBe(true)

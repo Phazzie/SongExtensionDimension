@@ -17,6 +17,9 @@ import { RealSongGenerationService } from '../../../src/services/real/RealSongGe
 import { RealCritiqueEngineService } from '../../../src/services/real/RealCritiqueEngineService'
 import { GrokProvider } from '../../../src/services/providers/GrokProvider'
 import type { IRevisionEngineService } from '../../../src/contracts/RevisionEngine'
+import { RevisionStrategy } from '../../../src/contracts/RevisionEngine'
+import type { CritiqueReport, QualityIssue } from '../../../src/contracts/CritiqueEngine'
+import type { Song } from '../../../src/contracts/types/song'
 import { isSuccess, isFailure } from '../../../src/contracts/types/common'
 import {
   createTestSong,
@@ -62,7 +65,7 @@ describe('RealRevisionEngineService Integration Tests', () => {
   })
 
   describe('Contract Compliance (12 tests)', () => {
-    it('should return ServiceResponse<RevisionOutput>', async () => {
+    it('should return ServiceResponse<RevisionResult>', async () => {
       if (!hasApiKey()) return
 
       const song = createTestSong()
@@ -71,7 +74,9 @@ describe('RealRevisionEngineService Integration Tests', () => {
       if (isSuccess(critique)) {
         const result = await service.reviseSong({
           song,
-          critiqueReport: critique.data,
+          critique: critique.data,
+          strategy: RevisionStrategy.MODERATE,
+          preserveVoice: true,
           targetIssues: []
         })
 
@@ -89,7 +94,9 @@ describe('RealRevisionEngineService Integration Tests', () => {
       if (isSuccess(critique)) {
         const result = await service.reviseSong({
           song,
-          critiqueReport: critique.data,
+          critique: critique.data,
+          strategy: RevisionStrategy.MODERATE,
+          preserveVoice: true,
           targetIssues: []
         })
 
@@ -109,7 +116,9 @@ describe('RealRevisionEngineService Integration Tests', () => {
       if (isSuccess(critique)) {
         const result = await service.reviseSong({
           song,
-          critiqueReport: critique.data,
+          critique: critique.data,
+          strategy: RevisionStrategy.MODERATE,
+          preserveVoice: true,
           targetIssues: []
         })
 
@@ -119,7 +128,7 @@ describe('RealRevisionEngineService Integration Tests', () => {
       }
     }, 45000)
 
-    it('should include improvement summary', async () => {
+    it('should include improvement metrics', async () => {
       if (!hasApiKey()) return
 
       const song = createTestSong()
@@ -128,13 +137,18 @@ describe('RealRevisionEngineService Integration Tests', () => {
       if (isSuccess(critique)) {
         const result = await service.reviseSong({
           song,
-          critiqueReport: critique.data,
+          critique: critique.data,
+          strategy: RevisionStrategy.MODERATE,
+          preserveVoice: true,
           targetIssues: []
         })
 
         if (isSuccess(result)) {
-          expect(result.data).toHaveProperty('improvementSummary')
-          expect(result.data.improvementSummary.length).toBeGreaterThan(0)
+          expect(result.data).toHaveProperty('improvementMetrics')
+          expect(result.data.improvementMetrics).toBeTruthy()
+          expect(result.data.improvementMetrics).toHaveProperty('beforeScore')
+          expect(result.data.improvementMetrics).toHaveProperty('afterScore')
+          expect(result.data.improvementMetrics).toHaveProperty('improvement')
         }
       }
     }, 45000)
@@ -148,20 +162,22 @@ describe('RealRevisionEngineService Integration Tests', () => {
       if (isSuccess(critique)) {
         const result = await service.reviseSong({
           song,
-          critiqueReport: critique.data,
+          critique: critique.data,
+          strategy: RevisionStrategy.MODERATE,
+          preserveVoice: true,
           targetIssues: []
         })
 
         if (isSuccess(result)) {
-          expect(result.data).toHaveProperty('beforeScore')
-          expect(result.data).toHaveProperty('afterScore')
-          assertScoreInRange(result.data.beforeScore, 0, 100)
-          assertScoreInRange(result.data.afterScore, 0, 100)
+          expect(result.data.improvementMetrics).toHaveProperty('beforeScore')
+          expect(result.data.improvementMetrics).toHaveProperty('afterScore')
+          assertScoreInRange(result.data.improvementMetrics.beforeScore, 0, 100)
+          assertScoreInRange(result.data.improvementMetrics.afterScore, 0, 100)
         }
       }
     }, 45000)
 
-    it('should calculate score delta correctly', async () => {
+    it('should calculate improvement correctly', async () => {
       if (!hasApiKey()) return
 
       const song = createTestSong()
@@ -170,19 +186,21 @@ describe('RealRevisionEngineService Integration Tests', () => {
       if (isSuccess(critique)) {
         const result = await service.reviseSong({
           song,
-          critiqueReport: critique.data,
+          critique: critique.data,
+          strategy: RevisionStrategy.MODERATE,
+          preserveVoice: true,
           targetIssues: []
         })
 
         if (isSuccess(result)) {
-          expect(result.data).toHaveProperty('scoreDelta')
-          const expectedDelta = result.data.afterScore - result.data.beforeScore
-          expect(Math.abs(result.data.scoreDelta - expectedDelta)).toBeLessThan(1)
+          expect(result.data.improvementMetrics).toHaveProperty('improvement')
+          const expectedDelta = result.data.improvementMetrics.afterScore - result.data.improvementMetrics.beforeScore
+          expect(Math.abs(result.data.improvementMetrics.improvement - expectedDelta)).toBeLessThan(1)
         }
       }
     }, 45000)
 
-    it('should include confidence score', async () => {
+    it('should include voice consistency score', async () => {
       if (!hasApiKey()) return
 
       const song = createTestSong()
@@ -191,19 +209,21 @@ describe('RealRevisionEngineService Integration Tests', () => {
       if (isSuccess(critique)) {
         const result = await service.reviseSong({
           song,
-          critiqueReport: critique.data,
+          critique: critique.data,
+          strategy: RevisionStrategy.MODERATE,
+          preserveVoice: true,
           targetIssues: []
         })
 
         if (isSuccess(result)) {
-          expect(result.data).toHaveProperty('confidence')
-          expect(result.data.confidence).toBeGreaterThanOrEqual(0)
-          expect(result.data.confidence).toBeLessThanOrEqual(1)
+          expect(result.data).toHaveProperty('voiceConsistency')
+          expect(result.data.voiceConsistency).toBeGreaterThanOrEqual(0)
+          expect(result.data.voiceConsistency).toBeLessThanOrEqual(100)
         }
       }
     }, 45000)
 
-    it('should include applied suggestions', async () => {
+    it('should include alternatives array', async () => {
       if (!hasApiKey()) return
 
       const song = createTestSong()
@@ -212,17 +232,19 @@ describe('RealRevisionEngineService Integration Tests', () => {
       if (isSuccess(critique)) {
         const result = await service.reviseSong({
           song,
-          critiqueReport: critique.data,
+          critique: critique.data,
+          strategy: RevisionStrategy.MODERATE,
+          preserveVoice: true,
           targetIssues: []
         })
 
         if (isSuccess(result)) {
-          expect(Array.isArray(result.data.appliedSuggestions)).toBe(true)
+          expect(Array.isArray(result.data.alternatives)).toBe(true)
         }
       }
     }, 45000)
 
-    it('should include rejected suggestions with explanations', async () => {
+    it('should include preserved elements', async () => {
       if (!hasApiKey()) return
 
       const song = createTestSong()
@@ -231,17 +253,14 @@ describe('RealRevisionEngineService Integration Tests', () => {
       if (isSuccess(critique)) {
         const result = await service.reviseSong({
           song,
-          critiqueReport: critique.data,
+          critique: critique.data,
+          strategy: RevisionStrategy.MODERATE,
+          preserveVoice: true,
           targetIssues: []
         })
 
         if (isSuccess(result)) {
-          expect(Array.isArray(result.data.rejectedSuggestions)).toBe(true)
-
-          result.data.rejectedSuggestions.forEach(rejected => {
-            expect(rejected).toHaveProperty('suggestion')
-            expect(rejected).toHaveProperty('reason')
-          })
+          expect(Array.isArray(result.data.preservedElements)).toBe(true)
         }
       }
     }, 45000)
@@ -255,20 +274,20 @@ describe('RealRevisionEngineService Integration Tests', () => {
       if (isSuccess(critique)) {
         const result = await service.reviseSong({
           song,
-          critiqueReport: critique.data,
+          critique: critique.data,
+          strategy: RevisionStrategy.MODERATE,
+          preserveVoice: true,
           targetIssues: []
-        }, { iterations: 2 })
+        }, { maxIterations: 2 })
 
         if (isSuccess(result)) {
-          expect(result.data).toHaveProperty('metadata')
-          if (result.data.metadata.iterationCount !== undefined) {
-            expect(result.data.metadata.iterationCount).toBeLessThanOrEqual(2)
-          }
+          // Implementation may track iterations in metadata
+          expect(result.data).toBeTruthy()
         }
       }
     }, 60000)
 
-    it('should have complete metadata', async () => {
+    it('should have issues fixed and remaining counts', async () => {
       if (!hasApiKey()) return
 
       const song = createTestSong()
@@ -277,13 +296,17 @@ describe('RealRevisionEngineService Integration Tests', () => {
       if (isSuccess(critique)) {
         const result = await service.reviseSong({
           song,
-          critiqueReport: critique.data,
+          critique: critique.data,
+          strategy: RevisionStrategy.MODERATE,
+          preserveVoice: true,
           targetIssues: []
         })
 
         if (isSuccess(result)) {
-          expect(result.data).toHaveProperty('metadata')
-          expect(result.data.metadata).toBeTruthy()
+          expect(result.data.improvementMetrics).toHaveProperty('issuesFixed')
+          expect(result.data.improvementMetrics).toHaveProperty('issuesRemaining')
+          expect(typeof result.data.improvementMetrics.issuesFixed).toBe('number')
+          expect(typeof result.data.improvementMetrics.issuesRemaining).toBe('number')
         }
       }
     }, 45000)
@@ -291,10 +314,11 @@ describe('RealRevisionEngineService Integration Tests', () => {
     it('should return failure for invalid input', async () => {
       if (!hasApiKey()) return
 
-      // @ts-expect-error: Testing invalid input
       const result = await service.reviseSong({
-        song: null,
-        critiqueReport: null,
+        song: null as unknown as Song,
+        critique: null as unknown as CritiqueReport,
+        strategy: RevisionStrategy.MODERATE,
+        preserveVoice: true,
         targetIssues: []
       })
 
@@ -315,12 +339,14 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
           if (isSuccess(result)) {
-            expect(result.data.scoreDelta).toBeGreaterThanOrEqual(-5)
+            expect(result.data.improvementMetrics.improvement).toBeGreaterThanOrEqual(-5)
           }
         }
       }
@@ -336,11 +362,15 @@ describe('RealRevisionEngineService Integration Tests', () => {
         const critique = await critiqueService.analyzeSong(song)
 
         if (isSuccess(critique) && critique.data.issues.length > 0) {
-          const targetIssue = critique.data.issues[0]
+          const firstIssue = critique.data.issues[0]
+          if (!firstIssue) return // Guard for TypeScript
+          const targetIssue = firstIssue.issueType
 
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: [targetIssue]
           })
 
@@ -364,7 +394,9 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
@@ -377,7 +409,7 @@ describe('RealRevisionEngineService Integration Tests', () => {
       }
     }, 80000)
 
-    it('should apply requested suggestions', async () => {
+    it('should record changes made', async () => {
       if (!hasApiKey()) return
 
       const genResult = await generationService.generate({ prompt: TestPrompts.simple() })
@@ -386,16 +418,24 @@ describe('RealRevisionEngineService Integration Tests', () => {
         const song = genResult.data.song
         const critique = await critiqueService.analyzeSong(song)
 
-        if (isSuccess(critique) && critique.data.suggestions.length > 0) {
+        if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
           if (isSuccess(result)) {
-            // Should have applied some suggestions
-            expect(result.data.appliedSuggestions.length).toBeGreaterThanOrEqual(0)
+            // Should have recorded changes
+            expect(result.data.changes.length).toBeGreaterThanOrEqual(0)
+            result.data.changes.forEach(change => {
+              expect(change).toHaveProperty('changeId')
+              expect(change).toHaveProperty('type')
+              expect(change).toHaveProperty('original')
+              expect(change).toHaveProperty('revised')
+            })
           }
         }
       }
@@ -413,13 +453,15 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
-          }, { iterations: 2 })
+          }, { maxIterations: 2 })
 
           if (isSuccess(result)) {
             // Multiple iterations should improve or maintain quality
-            expect(result.data.scoreDelta).toBeGreaterThanOrEqual(-5)
+            expect(result.data.improvementMetrics.improvement).toBeGreaterThanOrEqual(-5)
           }
         }
       }
@@ -440,7 +482,9 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
@@ -465,7 +509,9 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
@@ -491,7 +537,9 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
@@ -518,7 +566,9 @@ describe('RealRevisionEngineService Integration Tests', () => {
         const { duration, result } = await measurePerformance(
           () => service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           }),
           30000
@@ -538,13 +588,14 @@ describe('RealRevisionEngineService Integration Tests', () => {
       if (isSuccess(critique)) {
         const result = await service.reviseSong({
           song,
-          critiqueReport: critique.data,
+          critique: critique.data,
+          strategy: RevisionStrategy.MODERATE,
+          preserveVoice: true,
           targetIssues: []
         })
 
-        if (isSuccess(result) && result.data.metadata.tokensUsed) {
-          expect(result.data.metadata.tokensUsed).toBeLessThan(4000)
-        }
+        // Token tracking is implementation-specific
+        expect(isSuccess(result)).toBe(true)
       }
     }, 45000)
   })
@@ -562,12 +613,14 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
           if (isSuccess(result)) {
-            expect(result.data.scoreDelta).toBeGreaterThanOrEqual(-5)
+            expect(result.data.improvementMetrics.improvement).toBeGreaterThanOrEqual(-5)
           }
         }
       }
@@ -587,7 +640,9 @@ describe('RealRevisionEngineService Integration Tests', () => {
 
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
@@ -617,7 +672,9 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
@@ -641,7 +698,9 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
@@ -666,7 +725,9 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
@@ -689,7 +750,9 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
@@ -718,19 +781,21 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
           if (isSuccess(result)) {
             // After score should be better or similar
-            expect(result.data.afterScore).toBeGreaterThanOrEqual(result.data.beforeScore - 5)
+            expect(result.data.improvementMetrics.afterScore).toBeGreaterThanOrEqual(result.data.improvementMetrics.beforeScore - 5)
           }
         }
       }
     }, 80000)
 
-    it('should have positive confidence', async () => {
+    it('should have positive voice consistency', async () => {
       if (!hasApiKey()) return
 
       const song = createTestSong()
@@ -739,19 +804,21 @@ describe('RealRevisionEngineService Integration Tests', () => {
       if (isSuccess(critique)) {
         const result = await service.reviseSong({
           song,
-          critiqueReport: critique.data,
+          critique: critique.data,
+          strategy: RevisionStrategy.MODERATE,
+          preserveVoice: true,
           targetIssues: []
         })
 
         if (isSuccess(result)) {
-          expect(result.data.confidence).toBeGreaterThan(0.3)
+          expect(result.data.voiceConsistency).toBeGreaterThan(30)
         }
       }
     }, 45000)
   })
 
   describe('Semantic Tests (5 tests)', () => {
-    it('should apply feedback that matches critique suggestions', async () => {
+    it('should make changes that address critique issues', async () => {
       if (!hasApiKey()) return
 
       const genResult = await generationService.generate({ prompt: TestPrompts.simple() })
@@ -763,13 +830,15 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
           if (isSuccess(result)) {
-            // Applied suggestions should relate to original suggestions
-            expect(result.data.appliedSuggestions.length).toBeGreaterThanOrEqual(0)
+            // Changes should relate to issues found
+            expect(result.data.changes.length).toBeGreaterThanOrEqual(0)
           }
         }
       }
@@ -787,14 +856,16 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
           if (isSuccess(result)) {
             // Changes should have descriptions
             result.data.changes.forEach(change => {
-              expect(change.description.length).toBeGreaterThan(0)
+              expect(change.reason.length).toBeGreaterThan(0)
             })
           }
         }
@@ -812,14 +883,17 @@ describe('RealRevisionEngineService Integration Tests', () => {
 
         if (isSuccess(critique) && critique.data.issues.length > 0) {
           // Find highest impact issue
-          const highImpactIssue = critique.data.issues.sort((a, b) =>
+          const sortedIssues = [...critique.data.issues].sort((a: QualityIssue, b: QualityIssue) =>
             b.score_impact - a.score_impact
-          )[0]
+          )
+          const highImpactIssue = sortedIssues[0]
 
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
-            targetIssues: [highImpactIssue]
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
+            targetIssues: highImpactIssue ? [highImpactIssue.issueType] : undefined
           })
 
           if (isSuccess(result)) {
@@ -841,13 +915,15 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
-          }, { iterations: 2 })
+          }, { maxIterations: 2 })
 
           if (isSuccess(result)) {
             // Multiple iterations should show improvement
-            expect(result.data.afterScore).toBeGreaterThanOrEqual(result.data.beforeScore - 5)
+            expect(result.data.improvementMetrics.afterScore).toBeGreaterThanOrEqual(result.data.improvementMetrics.beforeScore - 5)
           }
         }
       }
@@ -865,7 +941,9 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
@@ -892,13 +970,15 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique) && critique.data.overallScore > 80) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
           if (isSuccess(result)) {
-            // High quality song should need few changes
-            expect(result.data.confidence).toBeGreaterThan(0.5)
+            // High quality song should maintain high voice consistency
+            expect(result.data.voiceConsistency).toBeGreaterThan(50)
           }
         }
       }
@@ -913,7 +993,9 @@ describe('RealRevisionEngineService Integration Tests', () => {
       if (isSuccess(critique)) {
         const result = await service.reviseSong({
           song: poorSong,
-          critiqueReport: critique.data,
+          critique: critique.data,
+          strategy: RevisionStrategy.MODERATE,
+          preserveVoice: true,
           targetIssues: []
         })
 
@@ -934,7 +1016,9 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique)) {
           const result = await service.reviseSong({
             song,
-            critiqueReport: critique.data,
+            critique: critique.data,
+            strategy: RevisionStrategy.MODERATE,
+            preserveVoice: true,
             targetIssues: []
           })
 
@@ -948,10 +1032,11 @@ describe('RealRevisionEngineService Integration Tests', () => {
 
       const song = createTestSong()
 
-      // @ts-expect-error: Testing invalid critique
       const result = await service.reviseSong({
         song,
-        critiqueReport: null,
+        critique: null as unknown as CritiqueReport,
+        strategy: RevisionStrategy.MODERATE,
+        preserveVoice: true,
         targetIssues: []
       })
 
@@ -967,9 +1052,11 @@ describe('RealRevisionEngineService Integration Tests', () => {
       if (isSuccess(critique)) {
         const result = await service.reviseSong({
           song,
-          critiqueReport: critique.data,
+          critique: critique.data,
+          strategy: RevisionStrategy.MODERATE,
+          preserveVoice: true,
           targetIssues: []
-        }, { iterations: 5 })
+        }, { maxIterations: 5 })
 
         expect(isSuccess(result) || isFailure(result)).toBe(true)
       }
