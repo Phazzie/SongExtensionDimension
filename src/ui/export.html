@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Export Song</title>
+  <style>
+    /* Base styles (will be imported from export.css in real extension) */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+      line-height: 1.6;
+      padding: 0;
+    }
+
+    .export-panel {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #fff;
+      border-bottom: 2px solid #007acc;
+      padding-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin-top: 15px;
+      margin-bottom: 10px;
+      color: #00d4ff;
+    }
+
+    h3 {
+      font-size: 16px;
+      margin-top: 20px;
+      margin-bottom: 15px;
+      color: #00d4ff;
+      border-bottom: 1px solid #444;
+      padding-bottom: 8px;
+    }
+
+    h4 {
+      font-size: 14px;
+      margin-top: 15px;
+      margin-bottom: 10px;
+      color: #e0e0e0;
+    }
+
+    .export-content {
+      margin-top: 20px;
+    }
+
+    section {
+      margin-bottom: 25px;
+      padding: 15px;
+      background-color: #252526;
+      border-radius: 4px;
+      border-left: 3px solid #007acc;
+    }
+
+    /* Song Info */
+    .song-info {
+      background-color: #1e3a5f;
+      border-left-color: #00d4ff;
+    }
+
+    .song-info h2 {
+      color: #fff;
+      margin-top: 0;
+    }
+
+    .song-info p {
+      color: #b0b0b0;
+      font-size: 13px;
+    }
+
+    /* Form Groups */
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      color: #e0e0e0;
+      font-size: 13px;
+    }
+
+    .format-selector,
+    .template-selector,
+    .suno-version-selector,
+    #convertToVersion,
+    input[type="text"] {
+      width: 100%;
+      padding: 8px 12px;
+      background-color: #3c3c3c;
+      border: 1px solid #555;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 13px;
+      font-family: inherit;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .format-selector:focus,
+    .template-selector:focus,
+    .suno-version-selector:focus,
+    #convertToVersion:focus,
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #007acc;
+      background-color: #3c3c3c;
+    }
+
+    .format-selector:hover,
+    .template-selector:hover,
+    .suno-version-selector:hover,
+    #convertToVersion:hover {
+      border-color: #007acc;
+    }
+
+    .template-description {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #b0b0b0;
+      font-style: italic;
+    }
+
+    /* Checkbox Group */
+    .export-options-group {
+      margin-top: 15px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      margin: 0;
+      cursor: pointer;
+      font-weight: normal;
+      color: #e0e0e0;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      margin-right: 8px;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: #007acc;
+    }
+
+    /* File Path Input */
+    .file-path-input {
+      display: flex;
+      gap: 8px;
+    }
+
+    .file-path-input input {
+      flex: 1;
+    }
+
+    .browse-btn {
+      padding: 8px 16px;
+      background-color: #3c3c3c;
+      border: 1px solid #555;
+      color: #e0e0e0;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      white-space: nowrap;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .browse-btn:hover {
+      background-color: #454545;
+      border-color: #007acc;
+    }
+
+    /* Preview Section */
+    .preview-section {
+      background-color: #1a1a1a;
+    }
+
+    .preview-content {
+      background-color: #0a0a0a;
+      border: 1px solid #444;
+      border-radius: 4px;
+      padding: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      color: #00d4ff;
+    }
+
+    /* Suno Details Section */
+    .suno-details {
+      background-color: #1a2d3a;
+    }
+
+    .suno-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .stat-box {
+      background-color: #0a1a2a;
+      border: 1px solid #00d4ff;
+      border-radius: 4px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stat-label {
+      color: #b0b0b0;
+      font-size: 12px;
+    }
+
+    .stat-value {
+      color: #00d4ff;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .stat-limit {
+      color: #888;
+      font-size: 12px;
+    }
+
+    .stat-value.error {
+      color: #ff6b6b;
+    }
+
+    .stat-value.warning {
+      color: #ffb400;
+    }
+
+    /* Validation Messages */
+    .validation-messages {
+      margin-bottom: 15px;
+    }
+
+    .validation-message {
+      padding: 8px 12px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .validation-message.error {
+      background-color: #3a1a1a;
+      border-left: 3px solid #ff6b6b;
+      color: #ff8080;
+    }
+
+    .validation-message.warning {
+      background-color: #3a2a1a;
+      border-left: 3px solid #ffb400;
+      color: #ffc400;
+    }
+
+    .validation-message.success {
+      background-color: #1a3a1a;
+      border-left: 3px solid #00d400;
+      color: #00ff00;
+    }
+
+    /* Tags List */
+    .tags-list,
+    .suggestions-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .tag {
+      background-color: #007acc;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .tag.suggestion {
+      background-color: #4a4a4a;
+      border: 1px solid #007acc;
+      color: #00d4ff;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      border: none;
+      background: none;
+    }
+
+    .button-primary,
+    .button-secondary {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background-color 0.2s, transform 0.1s;
+      flex: 1;
+    }
+
+    .button-primary {
+      background-color: #007acc;
+      color: #fff;
+    }
+
+    .button-primary:hover:not(:disabled) {
+      background-color: #005a9e;
+    }
+
+    .button-primary:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .button-primary:disabled {
+      background-color: #444;
+      color: #888;
+      cursor: not-allowed;
+    }
+
+    .button-secondary {
+      background-color: #3c3c3c;
+      color: #e0e0e0;
+      border: 1px solid #555;
+    }
+
+    .button-secondary:hover:not(:disabled) {
+      background-color: #454545;
+      border-color: #007acc;
+    }
+
+    .button-secondary:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .button-secondary:disabled {
+      background-color: #2a2a2a;
+      color: #666;
+      cursor: not-allowed;
+      border-color: #444;
+    }
+
+    /* Status Messages */
+    .status-message,
+    .error-message {
+      padding: 12px 15px;
+      border-radius: 4px;
+      margin-top: 15px;
+      font-size: 13px;
+      display: none;
+    }
+
+    .status-message {
+      background-color: #1a3a1a;
+      border: 1px solid #00d400;
+      color: #00ff00;
+    }
+
+    .error-message {
+      background-color: #3a1a1a;
+      border: 1px solid #ff6b6b;
+      color: #ff8080;
+    }
+
+    .status-message.show,
+    .error-message.show {
+      display: block;
+    }
+
+    /* Loading State */
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #555;
+      border-top-color: #007acc;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Preview Controls */
+    .preview-controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .preview-controls button {
+      flex: 1;
+    }
+
+    /* Version Conversion */
+    .version-conversion {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #444;
+    }
+
+    .version-conversion .form-group {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    .version-conversion label {
+      min-width: 100px;
+    }
+
+    .version-conversion select {
+      flex: 1;
+    }
+
+    .version-conversion button {
+      flex: 0;
+      min-width: 120px;
+    }
+
+    /* Suno Suggestions */
+    .suno-suggestions {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #444;
+    }
+
+    .suggestion-item {
+      background-color: #1a2a3a;
+      border: 1px solid #444;
+      border-radius: 4px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    .suggestion-item .section {
+      color: #00d4ff;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .suggestion-item .tag-type {
+      color: #b0b0b0;
+      font-size: 11px;
+      margin-bottom: 4px;
+    }
+
+    .suggestion-item .tag-text {
+      background-color: #007acc;
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+      margin-bottom: 4px;
+      display: inline-block;
+    }
+
+    .suggestion-item .reason {
+      color: #888;
+      font-style: italic;
+    }
+
+    .suggestion-item .confidence {
+      color: #00d4ff;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 600px) {
+      .export-panel {
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      h3 {
+        font-size: 14px;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .button-primary,
+      .button-secondary {
+        flex: auto;
+      }
+
+      .suno-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .version-conversion .form-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .version-conversion label {
+        min-width: auto;
+      }
+
+      .version-conversion button {
+        min-width: auto;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="export-panel">
+    <h1>Export Song</h1>
+
+    <div class="export-content">
+      <!-- Song Info -->
+      <section class="song-info">
+        <h2 id="songTitle">Untitled Song</h2>
+        <p id="songStats"></p>
+      </section>
+
+      <!-- Export Options -->
+      <section class="export-options">
+        <h3>Export Settings</h3>
+
+        <!-- Format Selector -->
+        <div class="form-group">
+          <label for="formatSelect">Export Format:</label>
+          <select id="formatSelect" class="format-selector">
+            <option value="text">Plain Text (.txt)</option>
+            <option value="markdown">Markdown (.md)</option>
+            <option value="json">JSON (.json)</option>
+            <option value="pdf">PDF (.pdf)</option>
+            <option value="html">HTML (.html)</option>
+            <option value="suno">Suno Format (.txt)</option>
+          </select>
+        </div>
+
+        <!-- Template Selector -->
+        <div class="form-group">
+          <label for="templateSelect">Template:</label>
+          <select id="templateSelect" class="template-selector">
+            <option value="">-- No Template --</option>
+          </select>
+          <p id="templateDescription" class="template-description"></p>
+        </div>
+
+        <!-- Suno Version Selector (shown only for Suno format) -->
+        <div class="form-group" id="sunoVersionGroup" style="display: none;">
+          <label for="sunoVersion">Suno Version:</label>
+          <select id="sunoVersion" class="suno-version-selector">
+            <option value="v4.0">Suno v4.0</option>
+            <option value="v4.5">Suno v4.5</option>
+            <option value="v5.0" selected>Suno v5.0 (Recommended)</option>
+          </select>
+        </div>
+
+        <!-- Export Options Checkboxes -->
+        <div class="export-options-group">
+          <h4>Include in Export:</h4>
+          <div class="checkbox-group">
+            <label>
+              <input type="checkbox" id="includeMetadata" checked>
+              Metadata (genre, mood, theme)
+            </label>
+            <label>
+              <input type="checkbox" id="includeCritique">
+              Critique Report
+            </label>
+            <label>
+              <input type="checkbox" id="includeHistory">
+              Modification History
+            </label>
+          </div>
+        </div>
+
+        <!-- File Path -->
+        <div class="form-group">
+          <label for="filePath">File Path (optional):</label>
+          <div class="file-path-input">
+            <input type="text" id="filePath" placeholder="Leave blank for default location">
+            <button id="browseBtn" class="browse-btn">Browse</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Preview Section -->
+      <section class="preview-section" id="previewSection" style="display: none;">
+        <h3>Preview</h3>
+        <div id="previewContent" class="preview-content"></div>
+        <div class="preview-controls">
+          <button id="copyPreviewBtn" class="button-secondary">Copy Preview</button>
+          <button id="clearPreviewBtn" class="button-secondary">Clear</button>
+        </div>
+      </section>
+
+      <!-- Suno Format Details (shown only for Suno format) -->
+      <section class="suno-details" id="sunoDetailsSection" style="display: none;">
+        <h3>Suno Format Details</h3>
+
+        <div class="suno-stats">
+          <div class="stat-box">
+            <span class="stat-label">Character Count:</span>
+            <span id="charCount" class="stat-value">0</span>
+            <span class="stat-limit">/ 3000</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Status:</span>
+            <span id="charStatus" class="stat-value success">OK</span>
+          </div>
+        </div>
+
+        <div class="validation-messages" id="validationMessages"></div>
+
+        <div class="suno-tags">
+          <h4>Applied Tags</h4>
+          <div id="appliedTagsList" class="tags-list"></div>
+        </div>
+
+        <div class="suno-suggestions">
+          <h4>Tag Suggestions</h4>
+          <button id="suggestTagsBtn" class="button-secondary">Get Suggestions</button>
+          <div id="tagSuggestionsList" class="suggestions-list"></div>
+        </div>
+
+        <div class="version-conversion">
+          <h4>Convert Version</h4>
+          <div class="form-group">
+            <label for="convertToVersion">Convert to:</label>
+            <select id="convertToVersion">
+              <option value="v4.0">Suno v4.0</option>
+              <option value="v4.5">Suno v4.5</option>
+              <option value="v5.0">Suno v5.0</option>
+            </select>
+            <button id="convertVersionBtn" class="button-secondary">Convert</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Action Buttons -->
+      <section class="action-buttons">
+        <button id="previewBtn" class="button-secondary">Preview</button>
+        <button id="exportBtn" class="button-primary">Export</button>
+        <button id="cancelBtn" class="button-secondary">Cancel</button>
+      </section>
+
+      <!-- Status Messages -->
+      <div id="statusMessage" class="status-message"></div>
+      <div id="errorMessage" class="error-message"></div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Export Panel Client-Side JavaScript
+     */
+
+    const vscode = acquireVsCodeApi && acquireVsCodeApi()
+
+    // DOM Elements
+    const formatSelect = document.getElementById('formatSelect')
+    const templateSelect = document.getElementById('templateSelect')
+    const sunoVersionGroup = document.getElementById('sunoVersionGroup')
+    const sunoVersion = document.getElementById('sunoVersion')
+    const includeMetadata = document.getElementById('includeMetadata')
+    const includeCritique = document.getElementById('includeCritique')
+    const includeHistory = document.getElementById('includeHistory')
+    const filePath = document.getElementById('filePath')
+    const browseBtn = document.getElementById('browseBtn')
+    const previewBtn = document.getElementById('previewBtn')
+    const exportBtn = document.getElementById('exportBtn')
+    const cancelBtn = document.getElementById('cancelBtn')
+    const previewSection = document.getElementById('previewSection')
+    const previewContent = document.getElementById('previewContent')
+    const sunoDetailsSection = document.getElementById('sunoDetailsSection')
+    const statusMessage = document.getElementById('statusMessage')
+    const errorMessage = document.getElementById('errorMessage')
+    const songTitle = document.getElementById('songTitle')
+
+    // Event Listeners
+    formatSelect.addEventListener('change', handleFormatChange)
+    templateSelect.addEventListener('change', handleTemplateChange)
+    previewBtn.addEventListener('click', handlePreview)
+    exportBtn.addEventListener('click', handleExport)
+    cancelBtn.addEventListener('click', () => window.close())
+    browseBtn.addEventListener('click', handleBrowse)
+
+    // Handle message from panel
+    window.addEventListener('message', event => {
+      const message = event.data
+
+      switch (message.command) {
+        case 'templatesLoaded':
+          populateTemplates(message.data.templates)
+          songTitle.textContent = message.data.currentSongTitle
+          break
+
+        case 'previewReady':
+          showPreview(message.data.preview)
+          break
+
+        case 'sunoFormatted':
+          displaySunoFormat(message.data)
+          break
+
+        case 'exportSuccess':
+          showSuccessMessage(message.data)
+          break
+
+        case 'error':
+          showErrorMessage(message.data.message)
+          break
+
+        case 'sunoTagsSuggested':
+          displayTagSuggestions(message.data.suggestions)
+          break
+
+        case 'sunoValidationResult':
+          displayValidation(message.data.validation)
+          break
+      }
+    })
+
+    function handleFormatChange() {
+      const format = formatSelect.value
+      const isSuno = format === 'suno'
+
+      // Show Suno version selector and details for Suno format
+      if (isSuno) {
+        sunoVersionGroup.style.display = 'block'
+        sunoDetailsSection.style.display = 'block'
+      } else {
+        sunoVersionGroup.style.display = 'none'
+        sunoDetailsSection.style.display = 'none'
+      }
+    }
+
+    function handleTemplateChange() {
+      const templateId = templateSelect.value
+      const selectedOption = templateSelect.options[templateSelect.selectedIndex]
+      const description = selectedOption.getAttribute('data-description')
+
+      const descEl = document.getElementById('templateDescription')
+      if (templateId && description) {
+        descEl.textContent = description
+      } else {
+        descEl.textContent = ''
+      }
+    }
+
+    function handlePreview() {
+      const format = formatSelect.value
+      vscode?.postMessage({
+        command: 'preview',
+        data: { format }
+      })
+    }
+
+    function handleExport() {
+      const format = formatSelect.value
+      const templateId = templateSelect.value || undefined
+      const sunoVer = format === 'suno' ? sunoVersion.value : undefined
+
+      vscode?.postMessage({
+        command: 'export',
+        data: {
+          format,
+          templateId,
+          sunoVersion: sunoVer,
+          includeMetadata: includeMetadata.checked,
+          includeCritique: includeCritique.checked,
+          includeHistory: includeHistory.checked,
+          filePath: filePath.value || undefined
+        }
+      })
+
+      exportBtn.disabled = true
+      exportBtn.textContent = 'Exporting...'
+    }
+
+    function handleBrowse() {
+      // In real VSCode extension, this would open a file dialog
+      filePath.focus()
+    }
+
+    function populateTemplates(templates) {
+      templates.forEach(template => {
+        const option = document.createElement('option')
+        option.value = template.id
+        option.textContent = template.name
+        option.setAttribute('data-description', template.description)
+        templateSelect.appendChild(option)
+      })
+    }
+
+    function showPreview(preview) {
+      previewSection.style.display = 'block'
+      previewContent.textContent = preview
+    }
+
+    function displaySunoFormat(data) {
+      const charCountEl = document.getElementById('charCount')
+      const charStatusEl = document.getElementById('charStatus')
+      const validationMsgEl = document.getElementById('validationMessages')
+      const appliedTagsEl = document.getElementById('appliedTagsList')
+
+      // Update character count
+      charCountEl.textContent = data.characterCount
+      charCountEl.className = 'stat-value'
+
+      // Update status
+      if (data.validation.withinLimit) {
+        charStatusEl.textContent = 'OK'
+        charStatusEl.className = 'stat-value success'
+      } else {
+        charStatusEl.textContent = 'EXCEEDS LIMIT'
+        charStatusEl.className = 'stat-value error'
+      }
+
+      // Display validation messages
+      validationMsgEl.innerHTML = ''
+      data.validation.errors.forEach(error => {
+        const div = document.createElement('div')
+        div.className = 'validation-message error'
+        div.innerHTML = `<span>❌</span> <span>${error}</span>`
+        validationMsgEl.appendChild(div)
+      })
+      data.validation.warnings.forEach(warning => {
+        const div = document.createElement('div')
+        div.className = 'validation-message warning'
+        div.innerHTML = `<span>⚠️</span> <span>${warning}</span>`
+        validationMsgEl.appendChild(div)
+      })
+
+      // Display applied tags
+      appliedTagsEl.innerHTML = ''
+      data.appliedTags.forEach(tag => {
+        const span = document.createElement('span')
+        span.className = 'tag'
+        span.textContent = tag
+        appliedTagsEl.appendChild(span)
+      })
+    }
+
+    function displayTagSuggestions(suggestions) {
+      const suggestionsList = document.getElementById('tagSuggestionsList')
+      suggestionsList.innerHTML = ''
+
+      suggestions.forEach(suggestion => {
+        const div = document.createElement('div')
+        div.className = 'suggestion-item'
+        div.innerHTML = `
+          <div class="section">${suggestion.section}</div>
+          <div class="tag-type">${suggestion.tagType}</div>
+          <div class="tag-text">${suggestion.tag}</div>
+          <div><span class="reason">${suggestion.reason}</span><span class="confidence">Confidence: ${(suggestion.confidence * 100).toFixed(0)}%</span></div>
+        `
+        suggestionsList.appendChild(div)
+      })
+    }
+
+    function displayValidation(validation) {
+      const validationMsgEl = document.getElementById('validationMessages')
+      validationMsgEl.innerHTML = ''
+
+      validation.errors.forEach(error => {
+        const div = document.createElement('div')
+        div.className = 'validation-message error'
+        div.innerHTML = `<span>❌</span> <span>${error}</span>`
+        validationMsgEl.appendChild(div)
+      })
+
+      validation.warnings.forEach(warning => {
+        const div = document.createElement('div')
+        div.className = 'validation-message warning'
+        div.innerHTML = `<span>⚠️</span> <span>${warning}</span>`
+        validationMsgEl.appendChild(div)
+      })
+    }
+
+    function showSuccessMessage(data) {
+      exportBtn.disabled = false
+      exportBtn.textContent = 'Export'
+
+      statusMessage.textContent = `✓ Exported successfully to ${data.format} (${formatFileSize(data.fileSize)})`
+      statusMessage.className = 'status-message show'
+
+      setTimeout(() => {
+        statusMessage.className = 'status-message'
+      }, 5000)
+    }
+
+    function showErrorMessage(message) {
+      exportBtn.disabled = false
+      exportBtn.textContent = 'Export'
+
+      errorMessage.textContent = `✕ Error: ${message}`
+      errorMessage.className = 'error-message show'
+
+      setTimeout(() => {
+        errorMessage.className = 'error-message'
+      }, 5000)
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes'
+      const k = 1024
+      const sizes = ['Bytes', 'KB', 'MB', 'GB']
+      const i = Math.floor(Math.log(bytes) / Math.log(k))
+      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
+    }
+  </script>
+</body>
+</html>

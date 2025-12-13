@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM"],
+    "outDir": "out/panels"
+  },
+  "include": [
+    "src/panels/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "out",
+    "tests"
+  ]
+}

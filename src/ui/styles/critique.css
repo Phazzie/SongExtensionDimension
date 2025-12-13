@@ -1,0 +1,588 @@
+/**
+ * Critique Panel Styles
+ * VSCode-themed quality analysis display
+ */
+
+/* ==================== GLOBAL STYLES ==================== */
+
+body {
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-foreground);
+  background-color: var(--vscode-editor-background);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+.critique-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* ==================== HEADER ==================== */
+
+.critique-header {
+  border-bottom: 2px solid var(--vscode-panel-border);
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.critique-header h1 {
+  margin: 0 0 10px 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--vscode-titleBar-activeForeground);
+}
+
+.song-metadata {
+  margin: 10px 0;
+}
+
+.metadata-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  margin-right: 8px;
+  background-color: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.analysis-date {
+  color: var(--vscode-descriptionForeground);
+  font-size: 13px;
+  margin: 5px 0 0 0;
+}
+
+/* ==================== OVERALL SCORE ==================== */
+
+.overall-score {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding: 30px;
+  background-color: var(--vscode-sideBar-background);
+  border-radius: 8px;
+  margin-bottom: 30px;
+  border: 1px solid var(--vscode-panel-border);
+}
+
+.score-circle {
+  flex-shrink: 0;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid;
+  position: relative;
+}
+
+.score-value {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.score-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 5px;
+  opacity: 0.8;
+}
+
+.quality-info {
+  flex-grow: 1;
+}
+
+.quality-badge {
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  border: 2px solid;
+}
+
+.gold-standard {
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.gold-standard .pass {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.gold-standard .fail {
+  color: #f44336;
+  font-weight: 600;
+}
+
+/* ==================== QUALITY CLASSES ==================== */
+
+/* Gold Standard: 90-100 */
+.quality-gold {
+  color: #ffd700;
+  border-color: #ffd700;
+  background-color: rgba(255, 215, 0, 0.1);
+}
+
+/* Excellent: 80-89 */
+.quality-excellent {
+  color: #4caf50;
+  border-color: #4caf50;
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+/* Good: 70-79 */
+.quality-good {
+  color: #8bc34a;
+  border-color: #8bc34a;
+  background-color: rgba(139, 195, 74, 0.1);
+}
+
+/* Acceptable: 60-69 */
+.quality-acceptable {
+  color: #ff9800;
+  border-color: #ff9800;
+  background-color: rgba(255, 152, 0, 0.1);
+}
+
+/* Needs Work: 40-59 */
+.quality-needs-work {
+  color: #ff5722;
+  border-color: #ff5722;
+  background-color: rgba(255, 87, 34, 0.1);
+}
+
+/* Poor: 0-39 */
+.quality-poor {
+  color: #f44336;
+  border-color: #f44336;
+  background-color: rgba(244, 67, 54, 0.1);
+}
+
+/* ==================== QUALITY SCORES ==================== */
+
+.quality-scores {
+  margin-bottom: 30px;
+}
+
+.quality-scores h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.scores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.score-item {
+  padding: 15px;
+  background-color: var(--vscode-sideBar-background);
+  border-radius: 6px;
+  border: 1px solid var(--vscode-panel-border);
+}
+
+.score-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.score-item-label {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.score-item-value {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.score-bar {
+  height: 8px;
+  background-color: var(--vscode-editor-background);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.score-bar-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+/* Score color classes */
+.score-gold {
+  color: #ffd700;
+}
+
+.score-bar-fill.score-gold {
+  background-color: #ffd700;
+}
+
+.score-excellent {
+  color: #4caf50;
+}
+
+.score-bar-fill.score-excellent {
+  background-color: #4caf50;
+}
+
+.score-good {
+  color: #8bc34a;
+}
+
+.score-bar-fill.score-good {
+  background-color: #8bc34a;
+}
+
+.score-acceptable {
+  color: #ff9800;
+}
+
+.score-bar-fill.score-acceptable {
+  background-color: #ff9800;
+}
+
+.score-needs-work {
+  color: #ff5722;
+}
+
+.score-bar-fill.score-needs-work {
+  background-color: #ff5722;
+}
+
+.score-poor {
+  color: #f44336;
+}
+
+.score-bar-fill.score-poor {
+  background-color: #f44336;
+}
+
+/* ==================== ISSUES ==================== */
+
+.issues {
+  margin-bottom: 30px;
+}
+
+.issues h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.no-issues {
+  padding: 20px;
+  background-color: rgba(76, 175, 80, 0.1);
+  border: 1px solid #4caf50;
+  border-radius: 6px;
+  color: #4caf50;
+  text-align: center;
+  font-weight: 500;
+}
+
+.issue-group {
+  margin-bottom: 25px;
+}
+
+.issue-group h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.issue-item {
+  padding: 15px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border-left: 4px solid;
+  background-color: var(--vscode-sideBar-background);
+}
+
+.severity-critical {
+  border-left-color: #f44336;
+  background-color: rgba(244, 67, 54, 0.05);
+}
+
+.severity-major {
+  border-left-color: #ff9800;
+  background-color: rgba(255, 152, 0, 0.05);
+}
+
+.severity-minor {
+  border-left-color: #ffc107;
+  background-color: rgba(255, 193, 7, 0.05);
+}
+
+.severity-info {
+  border-left-color: #2196f3;
+  background-color: rgba(33, 150, 243, 0.05);
+}
+
+.issue-header {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.issue-severity {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 3px;
+  background-color: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+}
+
+.issue-type {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vscode-descriptionForeground);
+}
+
+.issue-impact {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f44336;
+  margin-left: auto;
+}
+
+.issue-message {
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.issue-suggestion {
+  margin: 8px 0;
+  padding: 10px;
+  background-color: var(--vscode-editor-background);
+  border-radius: 4px;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--vscode-textLink-foreground);
+}
+
+.issue-lines {
+  margin: 5px 0 0 0;
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+}
+
+/* ==================== SUGGESTIONS ==================== */
+
+.suggestions {
+  margin-bottom: 30px;
+}
+
+.suggestions h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.suggestion-item {
+  padding: 15px;
+  background-color: var(--vscode-sideBar-background);
+  border-radius: 6px;
+  border: 1px solid var(--vscode-panel-border);
+}
+
+.suggestion-type {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--vscode-textLink-foreground);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.suggestion-description {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.suggestion-alternatives {
+  padding: 10px;
+  background-color: var(--vscode-editor-background);
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.suggestion-alternatives strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.suggestion-alternatives ul {
+  margin: 5px 0 0 0;
+  padding-left: 20px;
+}
+
+.suggestion-alternatives li {
+  margin-bottom: 3px;
+}
+
+/* ==================== STRENGTHS ==================== */
+
+.strengths {
+  margin-bottom: 30px;
+}
+
+.strengths h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.strengths-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+}
+
+.strengths-list li {
+  padding: 12px 15px;
+  background-color: rgba(76, 175, 80, 0.1);
+  border-left: 4px solid #4caf50;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.strengths-list li::before {
+  content: '✓ ';
+  color: #4caf50;
+  font-weight: 700;
+  margin-right: 5px;
+}
+
+/* ==================== ACTIONS ==================== */
+
+.actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  padding: 30px 0;
+  border-top: 1px solid var(--vscode-panel-border);
+  margin-top: 30px;
+}
+
+.action-button {
+  padding: 12px 30px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--vscode-font-family);
+}
+
+.action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.action-button:active {
+  transform: translateY(0);
+}
+
+.action-button.primary {
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+.action-button.primary:hover {
+  background-color: var(--vscode-button-hoverBackground);
+}
+
+.action-button.secondary {
+  background-color: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+}
+
+.action-button.secondary:hover {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  .critique-container {
+    padding: 15px;
+  }
+
+  .overall-score {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .scores-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .strengths-list {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .action-button {
+    width: 100%;
+  }
+}
+
+/* ==================== SCROLLBAR ==================== */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--vscode-editor-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--vscode-scrollbarSlider-background);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--vscode-scrollbarSlider-hoverBackground);
+}

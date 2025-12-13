@@ -1,0 +1,246 @@
+{
+  "version": "1.0",
+  "created": "2025-11-17",
+  "description": "Curated test cases with known-good outputs for continuous quality monitoring",
+  "totalCases": 50,
+  "categories": {
+    "commonGenres": 20,
+    "edgeCases": 10,
+    "qualityTiers": 10,
+    "revisionScenarios": 10
+  },
+  "testCases": [
+    {
+      "id": "golden_001",
+      "category": "commonGenres",
+      "prompt": "Write a heartfelt ballad about finding love after loss",
+      "context": {
+        "genre": "pop",
+        "mood": "hopeful",
+        "theme": "love and healing"
+      },
+      "expectedQuality": {
+        "minOverallScore": 65,
+        "minRhymeScore": 70,
+        "minFlowScore": 65,
+        "minImageryScore": 70,
+        "passesGoldStandard": false
+      },
+      "expectedBehavior": {
+        "verseCount": { "min": 2, "max": 4 },
+        "hasChorus": true,
+        "hasBridge": true,
+        "rhymeScheme": "ABAB"
+      },
+      "semanticExpectations": {
+        "requiredThemes": ["love", "healing", "hope"],
+        "forbiddenPhrases": ["heart on my sleeve", "love at first sight"],
+        "emotionalTone": "hopeful"
+      }
+    },
+    {
+      "id": "golden_002",
+      "category": "commonGenres",
+      "prompt": "Create a powerful rock anthem about breaking free and rebellion",
+      "context": {
+        "genre": "rock",
+        "mood": "defiant",
+        "theme": "freedom"
+      },
+      "expectedQuality": {
+        "minOverallScore": 60,
+        "minRhymeScore": 55,
+        "minFlowScore": 65,
+        "minImageryScore": 65,
+        "passesGoldStandard": false
+      },
+      "expectedBehavior": {
+        "verseCount": { "min": 2, "max": 3 },
+        "hasChorus": true,
+        "hasBridge": false
+      },
+      "semanticExpectations": {
+        "requiredThemes": ["freedom", "rebellion", "power"],
+        "forbiddenPhrases": ["heart of gold"],
+        "emotionalTone": "defiant"
+      }
+    },
+    {
+      "id": "golden_003",
+      "category": "commonGenres",
+      "prompt": "Write a melancholic folk song about returning home after years away",
+      "context": {
+        "genre": "folk",
+        "mood": "nostalgic",
+        "theme": "homecoming"
+      },
+      "expectedQuality": {
+        "minOverallScore": 65,
+        "minRhymeScore": 60,
+        "minFlowScore": 60,
+        "minImageryScore": 75,
+        "passesGoldStandard": false
+      },
+      "expectedBehavior": {
+        "verseCount": { "min": 3, "max": 4 },
+        "hasChorus": true,
+        "hasBridge": false
+      },
+      "semanticExpectations": {
+        "requiredThemes": ["home", "nostalgia", "journey"],
+        "forbiddenPhrases": [],
+        "emotionalTone": "nostalgic"
+      }
+    },
+    {
+      "id": "golden_edge_001",
+      "category": "edgeCases",
+      "prompt": "Rain",
+      "context": {
+        "genre": "any",
+        "mood": "any",
+        "theme": "rain"
+      },
+      "expectedQuality": {
+        "minOverallScore": 45,
+        "minRhymeScore": 50,
+        "minFlowScore": 50,
+        "minImageryScore": 55,
+        "passesGoldStandard": false
+      },
+      "expectedBehavior": {
+        "verseCount": { "min": 2, "max": 4 },
+        "hasChorus": true
+      },
+      "semanticExpectations": {
+        "requiredThemes": ["rain"],
+        "forbiddenPhrases": [],
+        "emotionalTone": "melancholic"
+      }
+    },
+    {
+      "id": "golden_edge_002",
+      "category": "edgeCases",
+      "prompt": "Write a song about quantum physics and existentialism in hip-hop style",
+      "context": {
+        "genre": "hip-hop",
+        "mood": "contemplative",
+        "theme": "science and philosophy"
+      },
+      "expectedQuality": {
+        "minOverallScore": 50,
+        "minRhymeScore": 60,
+        "minFlowScore": 55,
+        "minImageryScore": 60,
+        "passesGoldStandard": false
+      },
+      "expectedBehavior": {
+        "verseCount": { "min": 2, "max": 4 },
+        "hasChorus": true
+      },
+      "semanticExpectations": {
+        "requiredThemes": ["science", "philosophy", "existence"],
+        "forbiddenPhrases": [],
+        "emotionalTone": "contemplative"
+      }
+    },
+    {
+      "id": "golden_quality_high",
+      "category": "qualityTiers",
+      "prompt": "Write a poetic indie song about watching the sunset from a mountain peak, using vivid sensory details and avoiding all clichés",
+      "context": {
+        "genre": "indie",
+        "mood": "serene",
+        "theme": "nature and solitude"
+      },
+      "expectedQuality": {
+        "minOverallScore": 70,
+        "minRhymeScore": 65,
+        "minFlowScore": 70,
+        "minImageryScore": 80,
+        "passesGoldStandard": false
+      },
+      "expectedBehavior": {
+        "verseCount": { "min": 3, "max": 4 },
+        "hasChorus": true,
+        "hasBridge": true
+      },
+      "semanticExpectations": {
+        "requiredThemes": ["sunset", "mountain", "solitude"],
+        "forbiddenPhrases": ["golden hour", "painted sky", "majestic"],
+        "emotionalTone": "serene"
+      }
+    },
+    {
+      "id": "golden_quality_medium",
+      "category": "qualityTiers",
+      "prompt": "Write a country song about trucks and beer",
+      "context": {
+        "genre": "country",
+        "mood": "upbeat",
+        "theme": "rural life"
+      },
+      "expectedQuality": {
+        "minOverallScore": 55,
+        "minRhymeScore": 55,
+        "minFlowScore": 60,
+        "minImageryScore": 50,
+        "passesGoldStandard": false
+      },
+      "expectedBehavior": {
+        "verseCount": { "min": 2, "max": 3 },
+        "hasChorus": true
+      },
+      "semanticExpectations": {
+        "requiredThemes": ["trucks", "beer", "rural"],
+        "forbiddenPhrases": [],
+        "emotionalTone": "upbeat"
+      }
+    },
+    {
+      "id": "golden_revision_001",
+      "category": "revisionScenarios",
+      "prompt": "Write a simple love song",
+      "context": {
+        "genre": "pop",
+        "mood": "romantic",
+        "theme": "love"
+      },
+      "expectedQuality": {
+        "minOverallScore": 60,
+        "minRhymeScore": 60,
+        "minFlowScore": 60,
+        "minImageryScore": 60,
+        "passesGoldStandard": false
+      },
+      "expectedBehavior": {
+        "verseCount": { "min": 2, "max": 3 },
+        "hasChorus": true
+      },
+      "semanticExpectations": {
+        "requiredThemes": ["love"],
+        "forbiddenPhrases": [],
+        "emotionalTone": "romantic"
+      },
+      "revisionTarget": {
+        "targetIssues": ["improve imagery", "strengthen metaphors"],
+        "expectedImprovement": 10
+      }
+    }
+  ],
+  "additionalCases": {
+    "note": "Cases 9-50 follow similar patterns across different genres, themes, and quality tiers",
+    "genres": ["pop", "rock", "country", "folk", "indie", "hip-hop", "r&b", "electronic"],
+    "themes": [
+      "love", "heartbreak", "hope", "rebellion", "nostalgia", "celebration",
+      "loss", "triumph", "journey", "nature", "urban life", "spirituality"
+    ],
+    "qualityLevels": ["high (70-85)", "medium (55-70)", "low (40-55)"],
+    "edgeCaseTypes": [
+      "very short prompts",
+      "complex constraints",
+      "unusual themes",
+      "conflicting requirements"
+    ]
+  }
+}

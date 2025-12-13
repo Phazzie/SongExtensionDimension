@@ -1,0 +1,188 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    SONG GENERATION WEBVIEW PANEL ARCHITECTURE                ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│                         VSCode Extension Host                              │
+│                                                                            │
+│  ┌──────────────────────────────────────────────────────────────────────┐ │
+│  │  extension.ts                                                        │ │
+│  │  • activate()                                                        │ │
+│  │  • registerCommands()                                                │ │
+│  └───────────────────────────┬──────────────────────────────────────────┘ │
+│                              │                                             │
+│                              ↓                                             │
+│  ┌──────────────────────────────────────────────────────────────────────┐ │
+│  │  commands/generateSong.ts                                            │ │
+│  │  • generateSongCommand()                                             │ │
+│  │    → SongGenerationPanel.createOrShow()                              │ │
+│  └───────────────────────────┬──────────────────────────────────────────┘ │
+│                              │                                             │
+│                              ↓                                             │
+│  ┌──────────────────────────────────────────────────────────────────────┐ │
+│  │  SongGenerationPanel.ts                                              │ │
+│  │                                                                        │ │
+│  │  Services:                      State:                                │ │
+│  │  ├─ InputValidation              ├─ currentSong                       │ │
+│  │  ├─ SongGeneration               ├─ currentCritique                   │ │
+│  │  ├─ CritiqueEngine               └─ isGenerating                      │ │
+│  │  ├─ Export                                                            │ │
+│  │  └─ SunoFormatter                Message Handlers:                    │ │
+│  │                                  ├─ _handleGenerate()                 │ │
+│  │                                  ├─ _handleCritique()                 │ │
+│  │                                  ├─ _handleExport()                   │ │
+│  │                                  └─ _handleExportSuno()               │ │
+│  └───────────────────────────┬──────────────────────────────────────────┘ │
+│                              │                                             │
+│                              │ postMessage()                               │
+│                              ↓                                             │
+│  ┌──────────────────────────────────────────────────────────────────────┐ │
+│  │  Webview (HTML/CSS/JavaScript)                                       │ │
+│  │                                                                        │ │
+│  │  ┌────────────────────────────────────────────────────────────────┐  │ │
+│  │  │  UI Components                                                  │  │ │
+│  │  │                                                                  │  │ │
+│  │  │  📝 Generation Form                                             │  │ │
+│  │  │     • Prompt textarea                                           │  │ │
+│  │  │     • Genre/Mood/Theme selectors                                │  │ │
+│  │  │     • Structure constraints                                     │  │ │
+│  │  │     • Generate button                                           │  │ │
+│  │  │                                                                  │  │ │
+│  │  │  🎵 Song Display                                                │  │ │
+│  │  │     • Title & metadata                                          │  │ │
+│  │  │     • Verses, choruses, bridge                                  │  │ │
+│  │  │     • Action buttons                                            │  │ │
+│  │  │                                                                  │  │ │
+│  │  │  📊 Critique Display                                            │  │ │
+│  │  │     • Overall score (circular)                                  │  │ │
+│  │  │     • Individual scores (bars)                                  │  │ │
+│  │  │     • Strengths/Issues/Suggestions                              │  │ │
+│  │  │                                                                  │  │ │
+│  │  │  ⚠️  Error Display                                              │  │ │
+│  │  │     • Error message                                             │  │ │
+│  │  │     • Suggestion                                                │  │ │
+│  │  │     • Dismiss button                                            │  │ │
+│  │  │                                                                  │  │ │
+│  │  │  ⏳ Loading Display                                             │  │ │
+│  │  │     • Spinner animation                                         │  │ │
+│  │  │     • Status message                                            │  │ │
+│  │  └────────────────────────────────────────────────────────────────┘  │ │
+│  │                              │                                         │ │
+│  │                              │ vscode.postMessage()                    │ │
+│  │                              ↑                                         │ │
+│  └──────────────────────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+MESSAGE FLOW
+════════════
+
+User Action          Webview → Extension              Extension → Webview
+───────────          ───────────────────              ───────────────────
+
+Submit form    →     { type: 'generate',        →     { type: 'loading',
+                       payload: formData }              payload: { message } }
+                                               
+                                               →     { type: 'updateSong',
+                                                       payload: { song } }
+
+Click Critique →     { type: 'critique' }      →     { type: 'loading',
+                                                       payload: { message } }
+                                               
+                                               →     { type: 'critique',
+                                                       payload: { critique } }
+
+Click Export   →     { type: 'export',         →     Notification message
+                       payload: { format } }           (success/error)
+
+Error occurs   →     -                         →     { type: 'error',
+                                                       payload: { message,
+                                                                 suggestion } }
+
+
+DATA FLOW
+═════════
+
+1. SONG GENERATION
+   ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+   │ Raw Form │ -> │ Validate │ -> │ Generate │ -> │ Display  │
+   │   Data   │    │  Input   │    │   Song   │    │   Song   │
+   └──────────┘    └──────────┘    └──────────┘    └──────────┘
+   
+2. QUALITY ANALYSIS
+   ┌──────────┐    ┌──────────┐    ┌──────────┐
+   │ Current  │ -> │ Analyze  │ -> │ Display  │
+   │   Song   │    │ Quality  │    │ Critique │
+   └──────────┘    └──────────┘    └──────────┘
+
+3. EXPORT
+   ┌──────────┐    ┌──────────┐    ┌──────────┐
+   │ Current  │ -> │  Format  │ -> │   Save   │
+   │   Song   │    │   & Exp. │    │   File   │
+   └──────────┘    └──────────┘    └──────────┘
+
+
+SERVICE INTEGRATION
+═══════════════════
+
+SongGenerationPanel
+        │
+        ├─→ MockInputValidationService
+        │   • validate(RawPromptInput) → ValidationResult
+        │   • isValid(string) → boolean
+        │
+        ├─→ MockSongGenerationService
+        │   • generate(GenerateSongInput) → GenerateSongOutput
+        │   • regenerateSection() → Song
+        │   • generateAlternatives() → string[]
+        │
+        ├─→ MockCritiqueEngineService
+        │   • analyzeSong(Song) → CritiqueReport
+        │   • checkRhymeQuality() → RhymeQualityCheck
+        │   • evaluateFlow() → FlowEvaluation
+        │
+        ├─→ MockExportService
+        │   • exportSong(Song, ExportOptions) → ExportResult
+        │   • previewExport() → string
+        │
+        └─→ MockSunoFormatterService
+            • formatSong(Song, FormatOptions) → SunoFormatResult
+            • validateFormat() → SunoValidationResult
+
+
+FILE STRUCTURE
+══════════════
+
+SongExtensionDimension/
+├── src/
+│   ├── panels/
+│   │   └── SongGenerationPanel.ts      ← MAIN PANEL (1,002 lines)
+│   │
+│   ├── ui/
+│   │   └── styles/
+│   │       └── songGeneration.css      ← STYLES (575 lines)
+│   │
+│   ├── commands/
+│   │   ├── generateSong.ts             ← MODIFIED (opens panel)
+│   │   └── index.ts                    ← MODIFIED (registers command)
+│   │
+│   ├── services/
+│   │   └── mock/
+│   │       ├── MockInputValidationService.ts
+│   │       ├── MockSongGenerationService.ts
+│   │       ├── MockCritiqueEngineService.ts
+│   │       ├── MockExportService.ts
+│   │       └── MockSunoFormatterService.ts
+│   │
+│   └── contracts/
+│       ├── InputValidation.ts
+│       ├── SongGeneration.ts
+│       ├── CritiqueEngine.ts
+│       ├── Export.ts
+│       └── SunoFormatter.ts
+│
+├── WEBVIEW_PANEL_REPORT.md            ← COMPREHENSIVE REPORT
+├── TASK_SUMMARY.md                    ← QUICK SUMMARY
+└── ARCHITECTURE_DIAGRAM.txt           ← THIS FILE
+
+═══════════════════════════════════════════════════════════════════════════════

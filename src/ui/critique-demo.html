@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Critique Panel Demo</title>
+  <style>
+    /* VSCode Theme Variables - Dark Theme */
+    :root {
+      --vscode-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --vscode-font-size: 14px;
+      --vscode-foreground: #cccccc;
+      --vscode-editor-background: #1e1e1e;
+      --vscode-sideBar-background: #252526;
+      --vscode-panel-border: #3e3e42;
+      --vscode-titleBar-activeForeground: #ffffff;
+      --vscode-descriptionForeground: #999999;
+      --vscode-badge-background: #4d4d4d;
+      --vscode-badge-foreground: #ffffff;
+      --vscode-button-background: #0e639c;
+      --vscode-button-foreground: #ffffff;
+      --vscode-button-hoverBackground: #1177bb;
+      --vscode-button-secondaryBackground: #3a3d41;
+      --vscode-button-secondaryForeground: #cccccc;
+      --vscode-button-secondaryHoverBackground: #45494e;
+      --vscode-textLink-foreground: #3794ff;
+      --vscode-scrollbarSlider-background: #79797966;
+      --vscode-scrollbarSlider-hoverBackground: #646464b3;
+    }
+  </style>
+  <link rel="stylesheet" href="styles/critique.css">
+</head>
+<body>
+  <div class="critique-container">
+    <!-- Header -->
+    <header class="critique-header">
+      <h1>Lost in the City Lights</h1>
+      <p class="song-metadata">
+        <span class="metadata-tag">Pop</span>
+        <span class="metadata-tag">Melancholic</span>
+      </p>
+      <p class="analysis-date">Analyzed: 11/17/2025, 9:30:00 PM</p>
+    </header>
+
+    <!-- Overall Score -->
+    <section class="overall-score">
+      <div class="score-circle quality-excellent">
+        <div class="score-value">82</div>
+        <div class="score-label">Overall Score</div>
+      </div>
+      <div class="quality-info">
+        <div class="quality-badge quality-excellent">Excellent</div>
+        <div class="gold-standard">
+          <span class="fail">✗ Does Not Pass Gold Standard</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quality Scores -->
+    <section class="quality-scores">
+      <h2>Quality Breakdown</h2>
+      <div class="scores-grid">
+        <div class="score-item">
+          <div class="score-item-header">
+            <span class="score-item-label">Rhyme Quality</span>
+            <span class="score-item-value score-good">75</span>
+          </div>
+          <div class="score-bar">
+            <div class="score-bar-fill score-good" style="width: 75%"></div>
+          </div>
+        </div>
+
+        <div class="score-item">
+          <div class="score-item-header">
+            <span class="score-item-label">Flow Consistency</span>
+            <span class="score-item-value score-excellent">85</span>
+          </div>
+          <div class="score-bar">
+            <div class="score-bar-fill score-excellent" style="width: 85%"></div>
+          </div>
+        </div>
+
+        <div class="score-item">
+          <div class="score-item-header">
+            <span class="score-item-label">Imagery Vividness</span>
+            <span class="score-item-value score-gold">92</span>
+          </div>
+          <div class="score-bar">
+            <div class="score-bar-fill score-gold" style="width: 92%"></div>
+          </div>
+        </div>
+
+        <div class="score-item">
+          <div class="score-item-header">
+            <span class="score-item-label">Emotional Authenticity</span>
+            <span class="score-item-value score-excellent">88</span>
+          </div>
+          <div class="score-bar">
+            <div class="score-bar-fill score-excellent" style="width: 88%"></div>
+          </div>
+        </div>
+
+        <div class="score-item">
+          <div class="score-item-header">
+            <span class="score-item-label">Originality</span>
+            <span class="score-item-value score-acceptable">68</span>
+          </div>
+          <div class="score-bar">
+            <div class="score-bar-fill score-acceptable" style="width: 68%"></div>
+          </div>
+        </div>
+
+        <div class="score-item">
+          <div class="score-item-header">
+            <span class="score-item-label">Voice Consistency</span>
+            <span class="score-item-value score-excellent">90</span>
+          </div>
+          <div class="score-bar">
+            <div class="score-bar-fill score-excellent" style="width: 90%"></div>
+          </div>
+        </div>
+
+        <div class="score-item">
+          <div class="score-item-header">
+            <span class="score-item-label">Structural Coherence</span>
+            <span class="score-item-value score-excellent">85</span>
+          </div>
+          <div class="score-bar">
+            <div class="score-bar-fill score-excellent" style="width: 85%"></div>
+          </div>
+        </div>
+
+        <div class="score-item">
+          <div class="score-item-header">
+            <span class="score-item-label">Technical Execution</span>
+            <span class="score-item-value score-excellent">83</span>
+          </div>
+          <div class="score-bar">
+            <div class="score-bar-fill score-excellent" style="width: 83%"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Issues -->
+    <section class="issues">
+      <h2>Issues (4)</h2>
+
+      <div class="issue-group">
+        <h3>Major (2)</h3>
+        <div class="issue-item severity-major">
+          <div class="issue-header">
+            <span class="issue-severity">MAJOR</span>
+            <span class="issue-type">Cliche</span>
+            <span class="issue-impact">-10 pts</span>
+          </div>
+          <p class="issue-message">Cliché detected: "heart on my sleeve"</p>
+          <p class="issue-suggestion">💡 Replace with more original phrasing</p>
+          <p class="issue-lines">Lines: 8</p>
+        </div>
+
+        <div class="issue-item severity-major">
+          <div class="issue-header">
+            <span class="issue-severity">MAJOR</span>
+            <span class="issue-type">Common Phrase</span>
+            <span class="issue-impact">-8 pts</span>
+          </div>
+          <p class="issue-message">Originality (68) below gold standard (85)</p>
+          <p class="issue-suggestion">💡 Increase originality and avoid clichés</p>
+        </div>
+      </div>
+
+      <div class="issue-group">
+        <h3>Minor (2)</h3>
+        <div class="issue-item severity-minor">
+          <div class="issue-header">
+            <span class="issue-severity">MINOR</span>
+            <span class="issue-type">Weak Verb</span>
+            <span class="issue-impact">-2 pts</span>
+          </div>
+          <p class="issue-message">Weak verb: "was"</p>
+          <p class="issue-suggestion">💡 Use stronger, more specific verbs</p>
+          <p class="issue-lines">Lines: 12</p>
+        </div>
+
+        <div class="issue-item severity-minor">
+          <div class="issue-header">
+            <span class="issue-severity">MINOR</span>
+            <span class="issue-type">Vague Imagery</span>
+            <span class="issue-impact">-3 pts</span>
+          </div>
+          <p class="issue-message">Vague word: "nice"</p>
+          <p class="issue-suggestion">💡 Be more specific and concrete</p>
+          <p class="issue-lines">Lines: 15</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Suggestions -->
+    <section class="suggestions">
+      <h2>Suggestions (2)</h2>
+      <div class="suggestions-list">
+        <div class="suggestion-item">
+          <div class="suggestion-type">Cliche</div>
+          <p class="suggestion-description">Found 1 cliché(s). Replace clichés with original imagery and phrasing.</p>
+        </div>
+
+        <div class="suggestion-item">
+          <div class="suggestion-type">Weak Verb</div>
+          <p class="suggestion-description">Multiple weak verbs detected. Use stronger, more active verbs to create vivid imagery.</p>
+          <div class="suggestion-alternatives">
+            <strong>Alternatives:</strong>
+            <ul>
+              <li>Replace "was" with action verbs like "lingered", "echoed", "blazed"</li>
+              <li>Use sensory verbs that show instead of tell</li>
+              <li>Consider power verbs that match your song's emotion</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Strengths -->
+    <section class="strengths">
+      <h2>Strengths</h2>
+      <ul class="strengths-list">
+        <li>Strong rhyme quality</li>
+        <li>Consistent flow and rhythm</li>
+        <li>Vivid imagery</li>
+        <li>Authentic emotional expression</li>
+        <li>Consistent voice</li>
+        <li>Well-structured</li>
+      </ul>
+    </section>
+
+    <!-- Actions -->
+    <section class="actions">
+      <button class="action-button primary" onclick="alert('Apply Suggestions clicked')">Apply Suggestions</button>
+      <button class="action-button secondary" onclick="alert('Revise Song clicked')">Revise Song</button>
+    </section>
+  </div>
+</body>
+</html>

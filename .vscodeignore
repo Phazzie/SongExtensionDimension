@@ -1,0 +1,83 @@
+# VSCode Extension Packaging - Files to Exclude
+# These files are excluded from the extension package (.vsix file)
+
+# Development files
+.vscode/**
+.vscode-test/**
+src/**
+tests/**
+.gitignore
+.yarnrc
+vsc-extension-quickstart.md
+**/tsconfig.json
+**/.eslintrc.json
+**/*.map
+**/*.ts
+
+# Build artifacts (we include only compiled JS in /out)
+# All dependencies are bundled by webpack into /out, so we exclude all of node_modules
+node_modules/**
+
+# Documentation (only README.md is included)
+CLAUDE.md
+copilot-instructions.md
+AGENTS.md
+DATA-BOUNDARIES.md
+SEAMSLIST.md
+PROGRESS.md
+LESSONS-LEARNED.md
+
+# Test files
+jest.config.js
+**/*.test.ts
+**/*.test.js
+**/test/**
+**/tests/**
+**/__tests__/**
+**/__mocks__/**
+coverage/**
+
+# Git files
+.git/**
+.gitattributes
+
+# Build configs
+webpack.config.js
+tsconfig.json
+
+# CI/CD
+.github/**
+
+# NPM
+.npmignore
+npm-debug.log
+yarn-error.log
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+*.sublime-workspace
+*.sublime-project
+.idea/**
+
+# Logs
+*.log
+logs/**
+
+# Temporary files
+tmp/**
+temp/**
+*.tmp
+
+# Keep these files
+!README.md
+!LICENSE
+!CHANGELOG.md
+!package.json
+!out/**
+!resources/**
