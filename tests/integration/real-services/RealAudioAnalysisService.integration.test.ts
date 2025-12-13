@@ -13,7 +13,7 @@
  * NOTE: AudioAnalysis is 100% AI-powered using Gemini multimodal capabilities
  */
 
-import { describe, it, expect, beforeAll, beforeEach } from '@jest/globals'
+import { describe, it, expect, beforeAll } from '@jest/globals'
 import { RealAudioAnalysisService } from '../../../src/services/real/RealAudioAnalysisService'
 import { GeminiClient } from '../../../src/services/real/geminiClient'
 import type { IGeminiAudioService } from '../../../src/contracts/GeminiAudio'
@@ -56,10 +56,6 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     })
 
     service = new RealAudioAnalysisService(geminiClient)
-  })
-
-  beforeEach(() => {
-    // GeminiClient doesn't have clearCache - tests run fresh each time
   })
 
   describe('Contract Compliance (10 tests)', () => {
@@ -449,8 +445,8 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     it('should handle file size validation correctly', async () => {
       if (!hasApiKey()) return
 
-      // File too large (>10MB)
-      const largeAudioData = createMockAudioData(11 * 1024) // 11MB
+      // File too large (>10MB): 11 * 1024 KB = 11,264 KB ≈ 11 MB
+      const largeAudioData = createMockAudioData(11 * 1024)
       const result = await service.analyzeAudio({
         audioData: largeAudioData,
         fileName: 'large-audio.mp3',
@@ -627,8 +623,8 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     it('should handle very long files with duration check', async () => {
       if (!hasApiKey()) return
 
-      // Large file (simulates >600s duration)
-      const longAudioData = createMockAudioData(8 * 1024) // 8MB
+      // Large file (simulates >600s duration): 8 * 1024 KB = 8,192 KB = 8 MB
+      const longAudioData = createMockAudioData(8 * 1024)
       const result = await service.analyzeAudio({
         audioData: longAudioData,
         fileName: 'long-audio.mp3',

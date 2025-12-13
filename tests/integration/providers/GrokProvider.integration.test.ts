@@ -20,6 +20,26 @@ import type { IModelProvider } from '../../../src/contracts/providers/IModelProv
 import { hasApiKey } from '../../helpers/test-builders'
 import { assertValidServiceResponse, assertLatencyWithinSLA } from '../../helpers/assertion-helpers'
 
+/**
+ * Test-only interface for GrokProvider methods not on IModelProvider
+ * This allows type-safe access to test utilities without using `any` casts
+ */
+interface GrokProviderTestMethods {
+  clearCache(): void
+  clearCostHistory(): void
+  getCostStatistics(): {
+    readonly totalTokens: number
+    readonly totalCost: number
+    readonly requestCount: number
+    readonly averageCostPerRequest: number
+  }
+}
+
+/** Type guard to check if provider has test methods */
+function hasTestMethods(provider: IModelProvider): provider is IModelProvider & GrokProviderTestMethods {
+  return 'clearCache' in provider && 'clearCostHistory' in provider && 'getCostStatistics' in provider
+}
+
 describe('GrokProvider Integration Tests', () => {
   let provider: IModelProvider
 
@@ -39,14 +59,14 @@ describe('GrokProvider Integration Tests', () => {
   })
 
   afterAll(() => {
-    if (provider && 'clearCache' in provider) {
-      ;(provider as any).clearCache()
+    if (provider && hasTestMethods(provider)) {
+      provider.clearCache()
     }
   })
 
   beforeEach(() => {
-    if (provider && 'clearCache' in provider) {
-      ;(provider as any).clearCache()
+    if (provider && hasTestMethods(provider)) {
+      provider.clearCache()
     }
   })
 
@@ -473,7 +493,7 @@ describe('GrokProvider Integration Tests', () => {
 
     it('should allow cache to be cleared', async () => {
       if (!hasApiKey()) return
-      if (!('clearCache' in provider)) return
+      if (!hasTestMethods(provider)) return
 
       const request = {
         systemPrompt: 'test',
@@ -486,7 +506,7 @@ describe('GrokProvider Integration Tests', () => {
       await provider.generate(request)
 
       // Clear cache
-      ;(provider as any).clearCache()
+      provider.clearCache()
 
       // Second request should not be cached
       const start = Date.now()
@@ -531,12 +551,10 @@ describe('GrokProvider Integration Tests', () => {
   describe('Cost Tracking', () => {
     it('should track cost statistics', async () => {
       if (!hasApiKey()) return
-      if (!('getCostStatistics' in provider)) return
+      if (!hasTestMethods(provider)) return
 
       // Clear previous history
-      if ('clearCostHistory' in provider) {
-        ;(provider as any).clearCostHistory()
-      }
+      provider.clearCostHistory()
 
       await provider.generate({
         systemPrompt: 'test',
@@ -545,7 +563,7 @@ describe('GrokProvider Integration Tests', () => {
         maxTokens: 50
       })
 
-      const stats = (provider as any).getCostStatistics()
+      const stats = provider.getCostStatistics()
 
       expect(stats.totalTokens).toBeGreaterThan(0)
       expect(stats.totalCost).toBeGreaterThan(0)
@@ -564,12 +582,10 @@ describe('GrokProvider Integration Tests', () => {
 
     it('should accurately track actual costs', async () => {
       if (!hasApiKey()) return
-      if (!('getCostStatistics' in provider)) return
+      if (!hasTestMethods(provider)) return
 
       // Clear previous history
-      if ('clearCostHistory' in provider) {
-        ;(provider as any).clearCostHistory()
-      }
+      provider.clearCostHistory()
 
       const result = await provider.generate({
         systemPrompt: 'test',
@@ -581,7 +597,7 @@ describe('GrokProvider Integration Tests', () => {
       expect(isSuccess(result)).toBe(true)
 
       if (isSuccess(result)) {
-        const stats = (provider as any).getCostStatistics()
+        const stats = provider.getCostStatistics()
         const estimatedCost = provider.estimateCost(result.data.tokensUsed)
 
         // Actual cost should be close to estimated cost

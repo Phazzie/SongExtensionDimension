@@ -62,8 +62,14 @@ function loadGoldenTestCases(): readonly GoldenTestCase[] {
     const testDataPath = join(__dirname, 'golden-test-cases.json')
     const testData: GoldenTestData = JSON.parse(readFileSync(testDataPath, 'utf-8'))
     return testData.testCases
-  } catch {
-    // Return empty array if file doesn't exist
+  } catch (error: unknown) {
+    // Only return empty array for file-not-found errors
+    // Log other errors (JSON parse, permission issues) to avoid silent failures
+    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+      console.warn('⚠️  golden-test-cases.json not found - golden tests will be skipped')
+      return []
+    }
+    console.error('❌ Failed to load golden-test-cases.json:', error)
     return []
   }
 }
@@ -96,6 +102,11 @@ describe('Golden Test Set - Quality Validation', () => {
     critiqueService = new RealCritiqueEngineService(provider)
 
     results = new Map()
+  })
+
+  it('loads golden test cases from golden-test-cases.json', () => {
+    // Sanity check to ensure we don't silently pass with zero test cases
+    expect(testCases.length).toBeGreaterThan(0)
   })
 
   describe('Golden Test Cases', () => {

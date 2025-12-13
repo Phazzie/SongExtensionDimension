@@ -362,9 +362,8 @@ describe('RealRevisionEngineService Integration Tests', () => {
         const critique = await critiqueService.analyzeSong(song)
 
         if (isSuccess(critique) && critique.data.issues.length > 0) {
-          const firstIssue = critique.data.issues[0]
-          if (!firstIssue) return // Guard for TypeScript
-          const targetIssue = firstIssue.issueType
+          // Use non-null assertion - length > 0 guarantees first element exists
+          const targetIssue = critique.data.issues[0]!.issueType
 
           const result = await service.reviseSong({
             song,
@@ -882,18 +881,18 @@ describe('RealRevisionEngineService Integration Tests', () => {
         const critique = await critiqueService.analyzeSong(song)
 
         if (isSuccess(critique) && critique.data.issues.length > 0) {
-          // Find highest impact issue
+          // Find highest impact issue - length > 0 guarantees first element exists after sort
           const sortedIssues = [...critique.data.issues].sort((a: QualityIssue, b: QualityIssue) =>
             b.score_impact - a.score_impact
           )
-          const highImpactIssue = sortedIssues[0]
+          const highImpactIssue = sortedIssues[0]!
 
           const result = await service.reviseSong({
             song,
             critique: critique.data,
             strategy: RevisionStrategy.MODERATE,
             preserveVoice: true,
-            targetIssues: highImpactIssue ? [highImpactIssue.issueType] : undefined
+            targetIssues: [highImpactIssue.issueType]
           })
 
           if (isSuccess(result)) {

@@ -151,8 +151,13 @@ export async function measurePerformance<T>(
  * Calculate percentile from sorted array
  */
 export function calculatePercentile(sortedValues: number[], percentile: number): number {
-  const index = Math.floor(sortedValues.length * percentile)
-  return sortedValues[index] ?? 0
+  if (sortedValues.length === 0) return 0
+  // Clamp index to valid range to handle percentile === 1.0 (100th percentile)
+  const index = Math.min(
+    Math.floor(sortedValues.length * percentile),
+    sortedValues.length - 1
+  )
+  return sortedValues[index]!
 }
 
 /**
