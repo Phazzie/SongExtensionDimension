@@ -148,16 +148,27 @@ export async function measurePerformance<T>(
 }
 
 /**
- * Calculate percentile from sorted array
+ * Calculate percentile from sorted array using nearest rank method
+ * @param sortedValues Array of numbers sorted in ascending order
+ * @param percentile Value between 0 and 1 (e.g., 0.5 for median, 0.95 for P95)
+ * @returns The value at the given percentile, or 0 if array is empty
  */
 export function calculatePercentile(sortedValues: number[], percentile: number): number {
   if (sortedValues.length === 0) return 0
-  // Clamp index to valid range to handle percentile === 1.0 (100th percentile)
-  const index = Math.min(
-    Math.floor(sortedValues.length * percentile),
-    sortedValues.length - 1
+
+  // Clamp percentile to valid range [0, 1] to handle edge cases
+  const clampedPercentile = Math.max(0, Math.min(percentile, 1))
+
+  // Calculate index with both lower and upper bound clamping
+  const index = Math.max(
+    0,
+    Math.min(
+      Math.floor(sortedValues.length * clampedPercentile),
+      sortedValues.length - 1
+    )
   )
-  return sortedValues[index]!
+
+  return sortedValues[index] ?? 0
 }
 
 /**

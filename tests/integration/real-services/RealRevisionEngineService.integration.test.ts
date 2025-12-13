@@ -362,20 +362,22 @@ describe('RealRevisionEngineService Integration Tests', () => {
         const critique = await critiqueService.analyzeSong(song)
 
         if (isSuccess(critique) && critique.data.issues.length > 0) {
-          // Use non-null assertion - length > 0 guarantees first element exists
-          const targetIssue = critique.data.issues[0]!.issueType
+          // Use array destructuring (safer than non-null assertion)
+          const [firstIssue] = critique.data.issues
 
-          const result = await service.reviseSong({
-            song,
-            critique: critique.data,
-            strategy: RevisionStrategy.MODERATE,
-            preserveVoice: true,
-            targetIssues: [targetIssue]
-          })
+          if (firstIssue) {
+            const result = await service.reviseSong({
+              song,
+              critique: critique.data,
+              strategy: RevisionStrategy.MODERATE,
+              preserveVoice: true,
+              targetIssues: [firstIssue.issueType]
+            })
 
-          if (isSuccess(result)) {
-            // Should have attempted to fix the issue
-            expect(result.data.changes.length).toBeGreaterThan(0)
+            if (isSuccess(result)) {
+              // Should have attempted to fix the issue
+              expect(result.data.changes.length).toBeGreaterThan(0)
+            }
           }
         }
       }
@@ -881,22 +883,23 @@ describe('RealRevisionEngineService Integration Tests', () => {
         const critique = await critiqueService.analyzeSong(song)
 
         if (isSuccess(critique) && critique.data.issues.length > 0) {
-          // Find highest impact issue - length > 0 guarantees first element exists after sort
-          const sortedIssues = [...critique.data.issues].sort((a: QualityIssue, b: QualityIssue) =>
+          // Find highest impact issue using array destructuring (safer than index access)
+          const [highImpactIssue] = [...critique.data.issues].sort((a: QualityIssue, b: QualityIssue) =>
             b.score_impact - a.score_impact
           )
-          const highImpactIssue = sortedIssues[0]!
 
-          const result = await service.reviseSong({
-            song,
-            critique: critique.data,
-            strategy: RevisionStrategy.MODERATE,
-            preserveVoice: true,
-            targetIssues: [highImpactIssue.issueType]
-          })
+          if (highImpactIssue) {
+            const result = await service.reviseSong({
+              song,
+              critique: critique.data,
+              strategy: RevisionStrategy.MODERATE,
+              preserveVoice: true,
+              targetIssues: [highImpactIssue.issueType]
+            })
 
-          if (isSuccess(result)) {
-            expect(result.data.changes.length).toBeGreaterThan(0)
+            if (isSuccess(result)) {
+              expect(result.data.changes.length).toBeGreaterThan(0)
+            }
           }
         }
       }

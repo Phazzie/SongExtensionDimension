@@ -63,14 +63,15 @@ function loadGoldenTestCases(): readonly GoldenTestCase[] {
     const testData: GoldenTestData = JSON.parse(readFileSync(testDataPath, 'utf-8'))
     return testData.testCases
   } catch (error: unknown) {
-    // Only return empty array for file-not-found errors
-    // Log other errors (JSON parse, permission issues) to avoid silent failures
+    // Only return empty array for file-not-found errors (golden tests are optional)
     if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
       console.warn('⚠️  golden-test-cases.json not found - golden tests will be skipped')
       return []
     }
-    console.error('❌ Failed to load golden-test-cases.json:', error)
-    return []
+    // For all other errors (JSON parse, permission, etc.), throw to fail loudly
+    // This prevents silent test failures from corrupted/invalid test data
+    const message = error instanceof Error ? error.message : String(error)
+    throw new Error(`Failed to load golden-test-cases.json: ${message}`)
   }
 }
 

@@ -35,9 +35,17 @@ interface GrokProviderTestMethods {
   }
 }
 
-/** Type guard to check if provider has test methods */
-function hasTestMethods(provider: IModelProvider): provider is IModelProvider & GrokProviderTestMethods {
-  return 'clearCache' in provider && 'clearCostHistory' in provider && 'getCostStatistics' in provider
+/** Type guard to check if provider has test methods (validates they are functions) */
+function hasTestMethods(provider: IModelProvider | null | undefined): provider is IModelProvider & GrokProviderTestMethods {
+  if (provider == null) return false
+
+  // Cast through unknown to safely check for methods not in IModelProvider interface
+  const p = provider as unknown as Record<string, unknown>
+  return (
+    typeof p.clearCache === 'function' &&
+    typeof p.clearCostHistory === 'function' &&
+    typeof p.getCostStatistics === 'function'
+  )
 }
 
 describe('GrokProvider Integration Tests', () => {
@@ -59,13 +67,13 @@ describe('GrokProvider Integration Tests', () => {
   })
 
   afterAll(() => {
-    if (provider && hasTestMethods(provider)) {
+    if (hasTestMethods(provider)) {
       provider.clearCache()
     }
   })
 
   beforeEach(() => {
-    if (provider && hasTestMethods(provider)) {
+    if (hasTestMethods(provider)) {
       provider.clearCache()
     }
   })
