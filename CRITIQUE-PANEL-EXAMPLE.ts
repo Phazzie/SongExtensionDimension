@@ -9,6 +9,7 @@ import { MockSongGenerationService } from './src/services/mock/MockSongGeneratio
 import { isSuccess } from './src/contracts/types/common'
 import type { Song } from './src/contracts/types/song'
 import { createSongId, createVerseId } from './src/contracts/types/song'
+import { MockInputValidationService } from './src/services/mock/MockInputValidationService'
 
 /**
  * Example 1: Show critique for a song
@@ -31,6 +32,7 @@ export async function showCritiqueForSong(
  * Example 2: Generate song and show critique automatically
  */
 export async function generateAndCritique(context: vscode.ExtensionContext): Promise<void> {
+  const validationService = new MockInputValidationService()
   const generationService = new MockSongGenerationService()
 
   // Get user input
@@ -51,19 +53,24 @@ export async function generateAndCritique(context: vscode.ExtensionContext): Pro
       cancellable: false
     },
     async (progress) => {
-      // Generate song
-      progress.report({ increment: 0, message: 'Generating lyrics...' })
+      // Validate input first
+      progress.report({ increment: 0, message: 'Validating input...' })
+
+      const validationResult = await validationService.validate({
+        prompt,
+        context: { genre: 'pop', mood: 'melancholic' }
+      })
+
+      if (!isSuccess(validationResult)) {
+        vscode.window.showErrorMessage(`Validation failed: ${validationResult.error.message}`)
+        return
+      }
+
+      // Generate song with validated prompt
+      progress.report({ increment: 25, message: 'Generating lyrics...' })
 
       const result = await generationService.generate({
-        prompt: {
-          prompt,
-          sanitizedPrompt: prompt,
-          metadata: {
-            wordCount: prompt.split(' ').length,
-            hasExplicitContent: false,
-            language: 'en'
-          }
-        },
+        prompt: validationResult.data.validatedPrompt,
         style: {
           genre: 'pop',
           mood: 'melancholic'
