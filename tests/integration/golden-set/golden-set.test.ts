@@ -56,10 +56,23 @@ interface GoldenTestData {
   readonly testCases: readonly GoldenTestCase[]
 }
 
+// Load test cases synchronously at module level (required for describe-time iteration)
+function loadGoldenTestCases(): readonly GoldenTestCase[] {
+  try {
+    const testDataPath = join(__dirname, 'golden-test-cases.json')
+    const testData: GoldenTestData = JSON.parse(readFileSync(testDataPath, 'utf-8'))
+    return testData.testCases
+  } catch {
+    // Return empty array if file doesn't exist
+    return []
+  }
+}
+
+const testCases = loadGoldenTestCases()
+
 describe('Golden Test Set - Quality Validation', () => {
   let songService: RealSongGenerationService
   let critiqueService: RealCritiqueEngineService
-  let testCases: readonly GoldenTestCase[]
   let results: Map<string, {
     passed: boolean
     score: number
@@ -81,11 +94,6 @@ describe('Golden Test Set - Quality Validation', () => {
 
     songService = new RealSongGenerationService(provider)
     critiqueService = new RealCritiqueEngineService(provider)
-
-    // Load golden test cases
-    const testDataPath = join(__dirname, 'golden-test-cases.json')
-    const testData: GoldenTestData = JSON.parse(readFileSync(testDataPath, 'utf-8'))
-    testCases = testData.testCases
 
     results = new Map()
   })

@@ -152,7 +152,7 @@ export async function measurePerformance<T>(
  */
 export function calculatePercentile(sortedValues: number[], percentile: number): number {
   const index = Math.floor(sortedValues.length * percentile)
-  return sortedValues[index]
+  return sortedValues[index] ?? 0
 }
 
 /**

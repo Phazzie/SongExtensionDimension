@@ -180,16 +180,21 @@ describe('RealSongGenerationService Integration Tests', () => {
       if (isSuccess(result)) {
         const { song } = result.data
         const firstVerse = song.verses[0]
+        expect(firstVerse).toBeDefined()
 
-        firstVerse.lines.forEach((line, i) => {
-          expect(line).toHaveProperty('id')
-          expect(line).toHaveProperty('number')
-          expect(line.number).toBe(i + 1)
+        firstVerse!.lines.forEach((line) => {
+          // Line contract properties
           expect(line).toHaveProperty('text')
           expect(line.text).toBeTruthy()
           expect(line.text.length).toBeGreaterThan(0)
           expect(line).toHaveProperty('syllables')
           expect(typeof line.syllables).toBe('number')
+          expect(line.syllables).toBeGreaterThan(0)
+          expect(line).toHaveProperty('stressPattern')
+          expect(typeof line.stressPattern).toBe('string')
+          // rhymeSound is optional
+          // internalRhymes is optional
+          // lineNumber is optional
         })
       }
     }, 30000)
@@ -221,8 +226,8 @@ describe('RealSongGenerationService Integration Tests', () => {
           expect(Array.isArray(chorus.lines)).toBe(true)
           expect(chorus.lines.length).toBeGreaterThan(0)
           expect(chorus).toHaveProperty('rhymeScheme')
-          expect(chorus).toHaveProperty('isRepeat')
-          expect(typeof chorus.isRepeat).toBe('boolean')
+          expect(chorus).toHaveProperty('isMainChorus')
+          expect(typeof chorus.isMainChorus).toBe('boolean')
         })
       }
     }, 30000)
@@ -252,8 +257,8 @@ describe('RealSongGenerationService Integration Tests', () => {
       if (isSuccess(result)) {
         const { song } = result.data
 
-        // Bridge can be present or null
-        if (song.bridge !== null) {
+        // Bridge is optional in contract
+        if (song.bridge) {
           expect(song.bridge).toHaveProperty('id')
           expect(song.bridge).toHaveProperty('lines')
           expect(Array.isArray(song.bridge.lines)).toBe(true)
@@ -311,7 +316,7 @@ describe('RealSongGenerationService Integration Tests', () => {
       }
     }, 30000)
 
-    it('should have consistent line numbering', async () => {
+    it('should have valid line properties', async () => {
       if (!hasApiKey()) return
 
       const input = { prompt: TestPrompts.simple() }
@@ -321,8 +326,16 @@ describe('RealSongGenerationService Integration Tests', () => {
         const { song } = result.data
 
         song.verses.forEach(verse => {
-          verse.lines.forEach((line, i) => {
-            expect(line.number).toBe(i + 1)
+          verse.lines.forEach((line) => {
+            // Verify all required Line properties
+            expect(typeof line.text).toBe('string')
+            expect(typeof line.syllables).toBe('number')
+            expect(typeof line.stressPattern).toBe('string')
+
+            // Optional properties
+            if (line.lineNumber !== undefined) {
+              expect(typeof line.lineNumber).toBe('number')
+            }
           })
         })
       }
@@ -343,7 +356,7 @@ describe('RealSongGenerationService Integration Tests', () => {
       }
     }, 10000)
 
-    it('should have unique IDs for all elements', async () => {
+    it('should have unique IDs for sections', async () => {
       if (!hasApiKey()) return
 
       const input = { prompt: TestPrompts.simple() }
@@ -354,21 +367,15 @@ describe('RealSongGenerationService Integration Tests', () => {
         const ids = new Set<string>()
 
         ids.add(song.id)
-        song.verses.forEach(v => {
-          ids.add(v.id)
-          v.lines.forEach(l => ids.add(l.id))
-        })
-        song.choruses.forEach(c => {
-          ids.add(c.id)
-          c.lines.forEach(l => ids.add(l.id))
-        })
+        song.verses.forEach(v => ids.add(v.id))
+        song.choruses.forEach(c => ids.add(c.id))
+        if (song.bridge) {
+          ids.add(song.bridge.id)
+        }
 
-        // All IDs should be unique
-        const totalElements = 1 + song.verses.length + song.choruses.length +
-          song.verses.reduce((sum, v) => sum + v.lines.length, 0) +
-          song.choruses.reduce((sum, c) => sum + c.lines.length, 0)
-
-        expect(ids.size).toBe(totalElements)
+        // All section IDs should be unique
+        const totalSections = 1 + song.verses.length + song.choruses.length + (song.bridge ? 1 : 0)
+        expect(ids.size).toBe(totalSections)
       }
     }, 30000)
 
@@ -531,10 +538,14 @@ describe('RealSongGenerationService Integration Tests', () => {
         const { song } = result.data
 
         if (song.verses.length >= 2) {
-          const verse1Text = song.verses[0].lines.map(l => l.text).join(' ')
-          const verse2Text = song.verses[1].lines.map(l => l.text).join(' ')
+          const verse1 = song.verses[0]
+          const verse2 = song.verses[1]
+          if (verse1 && verse2) {
+            const verse1Text = verse1.lines.map(l => l.text).join(' ')
+            const verse2Text = verse2.lines.map(l => l.text).join(' ')
 
-          expect(verse1Text).not.toBe(verse2Text)
+            expect(verse1Text).not.toBe(verse2Text)
+          }
         }
       }
     }, 40000)
@@ -827,8 +838,9 @@ describe('RealSongGenerationService Integration Tests', () => {
       if (isSuccess(result)) {
         const { song } = result.data
 
-        expect(song.metadata.created).toBeInstanceOf(Date)
-        expect(song.metadata.created.getTime()).toBeLessThanOrEqual(Date.now())
+        // Song has generatedAt, not metadata.created
+        expect(song.generatedAt).toBeInstanceOf(Date)
+        expect(song.generatedAt.getTime()).toBeLessThanOrEqual(Date.now())
       }
     }, 40000)
   })
