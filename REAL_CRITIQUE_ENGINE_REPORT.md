@@ -18,13 +18,13 @@ Successfully implemented **RealCritiqueEngineService** - a 100% AI-powered song 
 ## Implementation Overview
 
 ### File Location
-```
-/home/user/SongExtensionDimension/src/services/real/RealCritiqueEngineService.ts
+```text
+src/services/real/RealCritiqueEngineService.ts
 ```
 
 ### Architecture
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │   RealCritiqueEngineService             │
 │   (1800+ lines, 8 public methods)       │
@@ -66,7 +66,7 @@ Unlike the mock service (which uses pattern matching), this service uses AI for:
 Each analysis type has a carefully crafted system prompt:
 
 #### Song Critique Prompt
-```
+```text
 You are a professional songwriting critic.
 
 ROLE: Analyze lyrics using {gold-standard|professional|casual} standards.

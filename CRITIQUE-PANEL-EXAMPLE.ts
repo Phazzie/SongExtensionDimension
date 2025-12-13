@@ -8,6 +8,7 @@ import { CritiquePanel } from './src/panels/CritiquePanel'
 import { MockSongGenerationService } from './src/services/mock/MockSongGenerationService'
 import { isSuccess } from './src/contracts/types/common'
 import type { Song } from './src/contracts/types/song'
+import { createSongId, createVerseId } from './src/contracts/types/song'
 
 /**
  * Example 1: Show critique for a song
@@ -53,8 +54,16 @@ export async function generateAndCritique(context: vscode.ExtensionContext): Pro
       // Generate song
       progress.report({ increment: 0, message: 'Generating lyrics...' })
 
-      const result = await generationService.generateSong({
-        prompt,
+      const result = await generationService.generate({
+        prompt: {
+          prompt,
+          sanitizedPrompt: prompt,
+          metadata: {
+            wordCount: prompt.split(' ').length,
+            hasExplicitContent: false,
+            language: 'en'
+          }
+        },
         style: {
           genre: 'pop',
           mood: 'melancholic'
@@ -62,7 +71,7 @@ export async function generateAndCritique(context: vscode.ExtensionContext): Pro
       })
 
       if (isSuccess(result)) {
-        const song = result.data
+        const song = result.data.song
 
         // Show critique
         progress.report({ increment: 50, message: 'Analyzing quality...' })
@@ -116,11 +125,11 @@ export function registerCritiqueCommands(context: vscode.ExtensionContext): void
       // Parse text to song (simplified for example)
       // In real implementation, use proper song parser
       const song: Song = {
-        id: 'temp_song' as any,
+        id: createSongId('temp_song'),
         title: 'Untitled',
         verses: [
           {
-            id: 'verse_1' as any,
+            id: createVerseId('verse_1'),
             number: 1,
             lines: text.split('\n').filter(l => l.trim()).map(text => ({
               text,

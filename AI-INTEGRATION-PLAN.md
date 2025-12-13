@@ -230,16 +230,22 @@ export class GrokProvider implements IModelProvider {
     return (tokens / 1_000_000) * 0.10
   }
 
+  // TODO: Implement in src/services/providers/GrokProvider.ts
   private async callGrokAPI(payload: unknown): Promise<any> {
-    // Retry logic, error handling, timeout management
+    // Implementation: Retry logic, error handling, timeout management
+    throw new Error('Not implemented - see src/services/providers/GrokProvider.ts')
   }
 
+  // TODO: Implement in src/services/providers/GrokProvider.ts
   private mapFinishReason(reason: string): 'completed' | 'length' | 'stop' | 'error' {
-    // Map Grok's finish reasons to our standard format
+    // Implementation: Map Grok's finish reasons to our standard format
+    throw new Error('Not implemented - see src/services/providers/GrokProvider.ts')
   }
 
+  // TODO: Implement in src/services/providers/GrokProvider.ts
   private calculateConfidence(response: any): number {
-    // Extract confidence from response metadata if available
+    // Implementation: Extract confidence from response metadata if available
+    throw new Error('Not implemented - see src/services/providers/GrokProvider.ts')
   }
 }
 ```
