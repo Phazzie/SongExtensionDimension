@@ -660,11 +660,23 @@ describe('GrokProvider Integration Tests', () => {
 })
 
 /**
- * Calculate similarity between two strings (simple word overlap)
+ * Calculate word-based similarity between two strings (Jaccard index)
+ * @returns Similarity score between 0 and 1
  */
 function calculateSimilarity(str1: string, str2: string): number {
-  const words1 = new Set(str1.toLowerCase().split(/\s+/))
-  const words2 = new Set(str2.toLowerCase().split(/\s+/))
+  // Filter out empty strings from split to avoid artifacts
+  const words1 = new Set(str1.toLowerCase().split(/\s+/).filter(Boolean))
+  const words2 = new Set(str2.toLowerCase().split(/\s+/).filter(Boolean))
+
+  // Handle edge case: both strings are empty/whitespace-only
+  if (words1.size === 0 && words2.size === 0) {
+    return 1 // Both empty = identical
+  }
+
+  // Handle edge case: one string is empty
+  if (words1.size === 0 || words2.size === 0) {
+    return 0 // One empty, one not = no similarity
+  }
 
   const intersection = new Set([...words1].filter(w => words2.has(w)))
   const union = new Set([...words1, ...words2])

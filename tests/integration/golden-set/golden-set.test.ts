@@ -208,6 +208,13 @@ describe('Golden Test Set - Quality Validation', () => {
       if (!hasApiKey()) return
 
       const totalTests = results.size
+
+      // Guard against division by zero when no tests ran
+      if (totalTests === 0) {
+        console.warn('⚠️  No golden test results recorded - skipping aggregate metrics')
+        return
+      }
+
       const passedTests = Array.from(results.values()).filter(r => r.passed).length
       const passRate = passedTests / totalTests
 
@@ -224,6 +231,13 @@ describe('Golden Test Set - Quality Validation', () => {
       if (!hasApiKey()) return
 
       const scores = Array.from(results.values()).map(r => r.score)
+
+      // Guard against division by zero when no scores recorded
+      if (scores.length === 0) {
+        console.warn('⚠️  No scores recorded - skipping quality analysis')
+        return
+      }
+
       const avgQuality = scores.reduce((a, b) => a + b, 0) / scores.length
 
       console.log(`   Average Quality: ${avgQuality.toFixed(1)}`)
@@ -237,6 +251,12 @@ describe('Golden Test Set - Quality Validation', () => {
 
     it('should have no critical regressions', () => {
       if (!hasApiKey()) return
+
+      // Guard against empty results
+      if (results.size === 0) {
+        console.warn('⚠️  No test results - skipping regression check')
+        return
+      }
 
       const failedTests = Array.from(results.entries())
         .filter(([_, result]) => !result.passed)

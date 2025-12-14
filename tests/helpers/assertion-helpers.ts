@@ -173,6 +173,9 @@ export function calculatePercentile(sortedValues: number[], percentile: number):
 
 /**
  * Run multiple iterations and check percentiles
+ * @param operation Async function to measure
+ * @param iterations Number of times to run (must be positive integer)
+ * @param p95Target Maximum acceptable P95 latency in ms
  */
 export async function runPerformanceTest<T>(
   operation: () => Promise<T>,
@@ -184,6 +187,13 @@ export async function runPerformanceTest<T>(
   p99: number
   results: T[]
 }> {
+  // Validate iterations to prevent meaningless results
+  if (!Number.isInteger(iterations) || iterations <= 0) {
+    throw new Error(
+      `runPerformanceTest: iterations must be a positive integer (got ${iterations})`
+    )
+  }
+
   const latencies: number[] = []
   const results: T[] = []
 

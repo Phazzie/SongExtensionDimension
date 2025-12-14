@@ -21,7 +21,7 @@ export function createValidatedPrompt(
     prompt: text,
     context: {
       genre: 'pop',
-      mood: 'neutral',
+      mood: 'calm', // Must be a valid mood from SUPPORTED_MOODS
       theme: 'general',
       targetAudience: 'adults',
       ...overrides?.context
@@ -39,7 +39,7 @@ export function createValidatedPrompt(
     },
     style: {
       genre: 'pop',
-      mood: 'neutral',
+      mood: 'calm', // Must be a valid mood from SUPPORTED_MOODS
       ...overrides?.style
     },
     sanitized: true,
