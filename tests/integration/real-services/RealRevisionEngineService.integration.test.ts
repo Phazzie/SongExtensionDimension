@@ -885,7 +885,7 @@ describe('RealRevisionEngineService Integration Tests', () => {
         if (isSuccess(critique) && critique.data.issues.length > 0) {
           // Find highest impact issue using array destructuring (safer than index access)
           const [highImpactIssue] = [...critique.data.issues].sort((a: QualityIssue, b: QualityIssue) =>
-            b.score_impact - a.score_impact
+            (b.score_impact ?? 0) - (a.score_impact ?? 0)
           )
 
           if (highImpactIssue) {
