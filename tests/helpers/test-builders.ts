@@ -187,10 +187,17 @@ export function extractAllLyrics(song: Song): string {
 }
 
 /**
- * Check if API key is available
+ * Check if Grok API key is available
  */
 export function hasApiKey(): boolean {
   return !!process.env.GROK_API_KEY
+}
+
+/**
+ * Check if Gemini API key is available
+ */
+export function hasGeminiApiKey(): boolean {
+  return !!process.env.GEMINI_API_KEY
 }
 
 /**

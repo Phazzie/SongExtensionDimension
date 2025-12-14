@@ -330,10 +330,13 @@ describe('RealCritiqueEngineService Integration Tests', () => {
           scores.technicalExecution
         ]
 
-        // Calculate variance
-        const avg = allScores.reduce((a, b) => (a as number) + (b as number), 0) / allScores.length
-        const variance = allScores.reduce((sum, score) =>
-          sum + Math.pow(score - avg, 2), 0) / allScores.length
+        // Calculate variance - filter out undefined values for type safety
+        // QualityScore is a branded number type, so we filter then cast to number[]
+        const validScores = allScores.filter(s => typeof s === 'number') as number[]
+        if (validScores.length === 0) return
+        const avg = validScores.reduce((a, b) => a + b, 0) / validScores.length
+        const variance = validScores.reduce((sum, score) =>
+          sum + Math.pow(score - avg, 2), 0) / validScores.length
 
         // Variance should be >10 (scores should differ)
         expect(variance).toBeGreaterThan(5)

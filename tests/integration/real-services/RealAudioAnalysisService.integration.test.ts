@@ -22,7 +22,7 @@ import {
   AnalysisType
 } from '../../../src/contracts/GeminiAudio'
 import { isSuccess, isFailure } from '../../../src/contracts/types/common'
-import { hasApiKey } from '../../helpers/test-builders'
+import { hasGeminiApiKey } from '../../helpers/test-builders'
 import {
   assertValidServiceResponse,
   assertLatencyWithinSLA,
@@ -45,13 +45,13 @@ describe('RealAudioAnalysisService Integration Tests', () => {
   }
 
   beforeAll(() => {
-    if (!hasApiKey()) {
-      console.warn('⚠️  Skipping RealAudioAnalysisService tests: GROK_API_KEY not set')
+    if (!hasGeminiApiKey()) {
+      console.warn('⚠️  Skipping RealAudioAnalysisService tests: GEMINI_API_KEY not set')
       return
     }
 
     geminiClient = new GeminiClient({
-      apiKey: process.env.GROK_API_KEY!,
+      apiKey: process.env.GEMINI_API_KEY!,
       model: 'gemini-2.0-flash-exp'
     })
 
@@ -60,7 +60,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
 
   describe('Contract Compliance (10 tests)', () => {
     it('should return ServiceResponse<AudioAnalysis> from analyzeAudio', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500) // 500KB
       const result = await service.analyzeAudio({
@@ -75,7 +75,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should include nested analysis.rhythmPattern', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -95,7 +95,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should include nested analysis.emotions', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -113,7 +113,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should include nested analysis.melody with key', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -133,7 +133,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should include nested analysis.structure', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -151,7 +151,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should include suggestions array', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -168,7 +168,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should include metadata with duration', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -187,7 +187,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should handle empty audio data gracefully', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const emptyAudioData = new ArrayBuffer(0)
       const result = await service.analyzeAudio({
@@ -207,7 +207,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 10000)
 
     it('should include analyzedAt timestamp', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -224,7 +224,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should validate input with empty prompt', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -244,7 +244,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
 
   describe('Behavioral Tests (8 tests)', () => {
     it('should detect reasonable BPM (40-220)', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -262,7 +262,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should identify emotions with confidence scores', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -284,7 +284,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should provide valid musical key', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -305,7 +305,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should classify rhythm type correctly', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -322,7 +322,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should identify melodic motifs and hooks', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -339,7 +339,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should complete within performance SLA (P95 < 30s)', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const { duration, result } = await measurePerformance(
@@ -357,7 +357,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 45000)
 
     it('should track duration in metadata', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -375,7 +375,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should provide actionable suggestions with rationale', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -398,7 +398,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
 
   describe('Quality Threshold Tests (5 tests)', () => {
     it('should have complete analysis for all sections', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -418,7 +418,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should provide consistent structure for same input', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result1 = await service.analyzeAudio({
@@ -443,7 +443,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 60000)
 
     it('should handle file size validation correctly', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       // File too large (>10MB): 11 * 1024 KB = 11,264 KB ≈ 11 MB
       const largeAudioData = createMockAudioData(11 * 1024)
@@ -461,7 +461,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 10000)
 
     it('should reject files that are too short', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       // Very small file (simulates <10s duration)
       const smallAudioData = createMockAudioData(50) // 50KB
@@ -479,7 +479,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 10000)
 
     it('should validate audio format from filename', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -498,7 +498,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
 
   describe('Semantic Tests (4 tests)', () => {
     it('should analyze structure sections with energy levels', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -519,7 +519,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should match emotions with time ranges', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -541,7 +541,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should identify coherent style elements in vocal analysis', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -558,7 +558,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should provide contextual suggestions based on analysis type', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -582,7 +582,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
 
   describe('Edge Cases (3 tests)', () => {
     it('should handle unsupported format gracefully', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -601,7 +601,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 10000)
 
     it('should validate time ranges in rhythm breakdown', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       const audioData = createMockAudioData(500)
       const result = await service.analyzeAudio({
@@ -621,7 +621,7 @@ describe('RealAudioAnalysisService Integration Tests', () => {
     }, 30000)
 
     it('should handle very long files with duration check', async () => {
-      if (!hasApiKey()) return
+      if (!hasGeminiApiKey()) return
 
       // Large file (simulates >600s duration): 8 * 1024 KB = 8,192 KB = 8 MB
       const longAudioData = createMockAudioData(8 * 1024)
