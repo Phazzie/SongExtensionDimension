@@ -62,9 +62,16 @@ function loadGoldenTestCases(): readonly GoldenTestCase[] {
     const testDataPath = join(__dirname, 'golden-test-cases.json')
     const testData: GoldenTestData = JSON.parse(readFileSync(testDataPath, 'utf-8'))
     return testData.testCases
-  } catch {
-    // Return empty array if file doesn't exist
-    return []
+  } catch (error: unknown) {
+    // Only return empty array for file-not-found errors (golden tests are optional)
+    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+      console.warn('⚠️  golden-test-cases.json not found - golden tests will be skipped')
+      return []
+    }
+    // For all other errors (JSON parse, permission, etc.), throw to fail loudly
+    // This prevents silent test failures from corrupted/invalid test data
+    const message = error instanceof Error ? error.message : String(error)
+    throw new Error(`Failed to load golden-test-cases.json: ${message}`)
   }
 }
 
@@ -96,6 +103,11 @@ describe('Golden Test Set - Quality Validation', () => {
     critiqueService = new RealCritiqueEngineService(provider)
 
     results = new Map()
+  })
+
+  it('loads golden test cases from golden-test-cases.json', () => {
+    // Sanity check to ensure we don't silently pass with zero test cases
+    expect(testCases.length).toBeGreaterThan(0)
   })
 
   describe('Golden Test Cases', () => {
@@ -196,6 +208,13 @@ describe('Golden Test Set - Quality Validation', () => {
       if (!hasApiKey()) return
 
       const totalTests = results.size
+
+      // Guard against division by zero when no tests ran
+      if (totalTests === 0) {
+        console.warn('⚠️  No golden test results recorded - skipping aggregate metrics')
+        return
+      }
+
       const passedTests = Array.from(results.values()).filter(r => r.passed).length
       const passRate = passedTests / totalTests
 
@@ -212,6 +231,13 @@ describe('Golden Test Set - Quality Validation', () => {
       if (!hasApiKey()) return
 
       const scores = Array.from(results.values()).map(r => r.score)
+
+      // Guard against division by zero when no scores recorded
+      if (scores.length === 0) {
+        console.warn('⚠️  No scores recorded - skipping quality analysis')
+        return
+      }
+
       const avgQuality = scores.reduce((a, b) => a + b, 0) / scores.length
 
       console.log(`   Average Quality: ${avgQuality.toFixed(1)}`)
@@ -225,6 +251,12 @@ describe('Golden Test Set - Quality Validation', () => {
 
     it('should have no critical regressions', () => {
       if (!hasApiKey()) return
+
+      // Guard against empty results
+      if (results.size === 0) {
+        console.warn('⚠️  No test results - skipping regression check')
+        return
+      }
 
       const failedTests = Array.from(results.entries())
         .filter(([_, result]) => !result.passed)

@@ -21,7 +21,7 @@ export function createValidatedPrompt(
     prompt: text,
     context: {
       genre: 'pop',
-      mood: 'neutral',
+      mood: 'calm', // Must be a valid mood from SUPPORTED_MOODS
       theme: 'general',
       targetAudience: 'adults',
       ...overrides?.context
@@ -39,7 +39,7 @@ export function createValidatedPrompt(
     },
     style: {
       genre: 'pop',
-      mood: 'neutral',
+      mood: 'calm', // Must be a valid mood from SUPPORTED_MOODS
       ...overrides?.style
     },
     sanitized: true,
@@ -172,9 +172,14 @@ function estimateSyllables(text: string): number {
 export function extractAllLyrics(song: Song): string {
   const lines: string[] = []
 
-  song.verses.forEach(v => v.lines.forEach(l => lines.push(l.text)))
-  song.choruses.forEach(c => c.lines.forEach(l => lines.push(l.text)))
-  if (song.bridge) {
+  // Add null checks for safety
+  if (song.verses) {
+    song.verses.forEach(v => v.lines?.forEach(l => lines.push(l.text)))
+  }
+  if (song.choruses) {
+    song.choruses.forEach(c => c.lines?.forEach(l => lines.push(l.text)))
+  }
+  if (song.bridge?.lines) {
     song.bridge.lines.forEach(l => lines.push(l.text))
   }
 
@@ -182,14 +187,34 @@ export function extractAllLyrics(song: Song): string {
 }
 
 /**
- * Check if API key is available
+ * Check if Grok API key is available
  */
 export function hasApiKey(): boolean {
   return !!process.env.GROK_API_KEY
 }
 
 /**
+ * Check if Gemini API key is available
+ */
+export function hasGeminiApiKey(): boolean {
+  return !!process.env.GEMINI_API_KEY
+}
+
+/**
  * Skip test if no API key
+ *
+ * NOTE: This function does NOT actually skip tests - it only logs a warning.
+ * To properly skip tests based on API key availability, use:
+ *
+ * @example
+ * // Use conditional test definition:
+ * (hasApiKey() ? test : test.skip)('test name', () => { ... })
+ *
+ * // Or use early return in test:
+ * test('test name', () => {
+ *   if (!hasApiKey()) { return; }
+ *   // ... test code
+ * })
  */
 export function skipIfNoApiKey(): void {
   if (!hasApiKey()) {
@@ -216,7 +241,7 @@ export const TestPrompts = {
     }
   ),
 
-  shortPrompt: () => createValidatedPrompt('Rain'),
+  shortPrompt: () => createValidatedPrompt('Short rain song'),
 
   withConstraints: () => createValidatedPrompt('Write a song', {
     constraints: {

@@ -20,6 +20,34 @@ import type { IModelProvider } from '../../../src/contracts/providers/IModelProv
 import { hasApiKey } from '../../helpers/test-builders'
 import { assertValidServiceResponse, assertLatencyWithinSLA } from '../../helpers/assertion-helpers'
 
+/**
+ * Test-only interface for GrokProvider methods not on IModelProvider
+ * This allows type-safe access to test utilities without using `any` casts
+ */
+interface GrokProviderTestMethods {
+  clearCache(): void
+  clearCostHistory(): void
+  getCostStatistics(): {
+    readonly totalTokens: number
+    readonly totalCost: number
+    readonly requestCount: number
+    readonly averageCostPerRequest: number
+  }
+}
+
+/** Type guard to check if provider has test methods (validates they are functions) */
+function hasTestMethods(provider: IModelProvider | null | undefined): provider is IModelProvider & GrokProviderTestMethods {
+  if (provider == null) return false
+
+  // Cast through unknown to safely check for methods not in IModelProvider interface
+  const p = provider as unknown as Record<string, unknown>
+  return (
+    typeof p.clearCache === 'function' &&
+    typeof p.clearCostHistory === 'function' &&
+    typeof p.getCostStatistics === 'function'
+  )
+}
+
 describe('GrokProvider Integration Tests', () => {
   let provider: IModelProvider
 
@@ -39,14 +67,14 @@ describe('GrokProvider Integration Tests', () => {
   })
 
   afterAll(() => {
-    if (provider && 'clearCache' in provider) {
-      ;(provider as any).clearCache()
+    if (hasTestMethods(provider)) {
+      provider.clearCache()
     }
   })
 
   beforeEach(() => {
-    if (provider && 'clearCache' in provider) {
-      ;(provider as any).clearCache()
+    if (hasTestMethods(provider)) {
+      provider.clearCache()
     }
   })
 
@@ -473,7 +501,7 @@ describe('GrokProvider Integration Tests', () => {
 
     it('should allow cache to be cleared', async () => {
       if (!hasApiKey()) return
-      if (!('clearCache' in provider)) return
+      if (!hasTestMethods(provider)) return
 
       const request = {
         systemPrompt: 'test',
@@ -486,7 +514,7 @@ describe('GrokProvider Integration Tests', () => {
       await provider.generate(request)
 
       // Clear cache
-      ;(provider as any).clearCache()
+      provider.clearCache()
 
       // Second request should not be cached
       const start = Date.now()
@@ -531,12 +559,10 @@ describe('GrokProvider Integration Tests', () => {
   describe('Cost Tracking', () => {
     it('should track cost statistics', async () => {
       if (!hasApiKey()) return
-      if (!('getCostStatistics' in provider)) return
+      if (!hasTestMethods(provider)) return
 
       // Clear previous history
-      if ('clearCostHistory' in provider) {
-        ;(provider as any).clearCostHistory()
-      }
+      provider.clearCostHistory()
 
       await provider.generate({
         systemPrompt: 'test',
@@ -545,7 +571,7 @@ describe('GrokProvider Integration Tests', () => {
         maxTokens: 50
       })
 
-      const stats = (provider as any).getCostStatistics()
+      const stats = provider.getCostStatistics()
 
       expect(stats.totalTokens).toBeGreaterThan(0)
       expect(stats.totalCost).toBeGreaterThan(0)
@@ -564,12 +590,10 @@ describe('GrokProvider Integration Tests', () => {
 
     it('should accurately track actual costs', async () => {
       if (!hasApiKey()) return
-      if (!('getCostStatistics' in provider)) return
+      if (!hasTestMethods(provider)) return
 
       // Clear previous history
-      if ('clearCostHistory' in provider) {
-        ;(provider as any).clearCostHistory()
-      }
+      provider.clearCostHistory()
 
       const result = await provider.generate({
         systemPrompt: 'test',
@@ -581,7 +605,7 @@ describe('GrokProvider Integration Tests', () => {
       expect(isSuccess(result)).toBe(true)
 
       if (isSuccess(result)) {
-        const stats = (provider as any).getCostStatistics()
+        const stats = provider.getCostStatistics()
         const estimatedCost = provider.estimateCost(result.data.tokensUsed)
 
         // Actual cost should be close to estimated cost
@@ -636,11 +660,23 @@ describe('GrokProvider Integration Tests', () => {
 })
 
 /**
- * Calculate similarity between two strings (simple word overlap)
+ * Calculate word-based similarity between two strings (Jaccard index)
+ * @returns Similarity score between 0 and 1
  */
 function calculateSimilarity(str1: string, str2: string): number {
-  const words1 = new Set(str1.toLowerCase().split(/\s+/))
-  const words2 = new Set(str2.toLowerCase().split(/\s+/))
+  // Filter out empty strings from split to avoid artifacts
+  const words1 = new Set(str1.toLowerCase().split(/\s+/).filter(Boolean))
+  const words2 = new Set(str2.toLowerCase().split(/\s+/).filter(Boolean))
+
+  // Handle edge case: both strings are empty/whitespace-only
+  if (words1.size === 0 && words2.size === 0) {
+    return 1 // Both empty = identical
+  }
+
+  // Handle edge case: one string is empty
+  if (words1.size === 0 || words2.size === 0) {
+    return 0 // One empty, one not = no similarity
+  }
 
   const intersection = new Set([...words1].filter(w => words2.has(w)))
   const union = new Set([...words1, ...words2])
